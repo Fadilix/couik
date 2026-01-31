@@ -13,7 +13,7 @@ var quotes = []string{
 	"The quick brown fox jumps over the lazy dog.",
 	"To be, or not to be, that is the question.",
 	"Stay hungry, stay foolish.",
-	"Code is like humor. When you have to explain it, it’s bad.",
+	"Code is like humor. When you have to explain it, it's bad.",
 	"The best way to predict the future is to invent it.",
 }
 

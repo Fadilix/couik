@@ -10,6 +10,8 @@ import (
 )
 
 func GameLoop(target string, r *bufio.Reader) {
+	fmt.Print("\033[?25l")
+	defer fmt.Print("\033[?25h")
 	fmt.Print("\rStart typing when you are ready!\n")
 
 	var startTime time.Time
@@ -34,6 +36,20 @@ func GameLoop(target string, r *bufio.Reader) {
 		color.Set(color.FgHiBlack)
 		fmt.Print(target[i:])
 		color.Unset()
+
+		// move the cursor down
+		fmt.Print("\033[K")
+
+		if started {
+			currentDuration := time.Since(startTime)
+			currentCorrect := CountCorrect(results[:i])
+			liveWpm := stats.CalculateTypingSpeed(currentCorrect, currentDuration)
+			liveAcc := stats.CalculateAccuracy(currentCorrect, len(target[:i]))
+
+			// \033[2B moves cursor down 2 lines
+			// \033[2A moves cursor up 2 lines
+			fmt.Printf("\033[2B\r\033[KLive WPM : %.2f\n\rLive Acc : %.2f%%\033[3A", liveWpm, liveAcc)
+		}
 
 		char, _ := r.ReadByte()
 		if char == 127 || char == 8 {
