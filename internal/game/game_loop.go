@@ -3,41 +3,74 @@ package game
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/fadilix/couik/pkg/typing/stats"
+	"github.com/fatih/color"
 )
 
 func GameLoop(target string, r *bufio.Reader) {
-	// when the terminal is in raw mode we use \r to have the same
-	// behavior as on Cooked Mode
-	fmt.Printf("Type this ↓ \r\n\n %s \r\n\n", target)
-	fmt.Print("Type enter when you are ready to type\r\n")
+	fmt.Print("\rStart typing when you are ready!\n")
 
-	os.Stdin.Read(make([]byte, 1))
+	var startTime time.Time
+	started := false
 
-	startTime := time.Now()
+	results := make([]bool, len(target))
 
-	visual := ""
 	for i := 0; i < len(target); {
+		fmt.Print("\r")
+
+		for j := 0; j < i; j++ {
+			if results[j] {
+				color.Set(color.FgGreen)
+			} else {
+				color.Set(color.FgRed)
+			}
+			fmt.Print(string(target[j]))
+		}
+
+		color.Unset()
+
+		color.Set(color.FgHiBlack)
+		fmt.Print(target[i:])
+		color.Unset()
+
 		char, _ := r.ReadByte()
+		if char == 127 || char == 8 {
+			if i > 0 {
+				i--
+			}
+			continue
+		}
+
+		if !started {
+			startTime = time.Now()
+			started = true
+		}
 
 		if char == target[i] {
-			fmt.Print(string(char))
-			visual += string(char)
-			i++
+			results[i] = true
+		} else {
+			results[i] = false
 		}
+
+		i++
 
 		if char == 3 {
 			return
 		}
 	}
+
 	duration := time.Since(startTime)
 
-	wpm := stats.CalculateTypingSpeed(target, duration)
+	correct := CountCorrect(results)
+	incorrect := CountIncorrect(results)
 
-	fmt.Printf("\r\nYour typing speed is %.2f", wpm)
-	fmt.Printf("\r\n\nType any character to quit")
-	os.Stdin.Read(make([]byte, 1))
+	wpm := stats.CalculateTypingSpeed(correct, duration)
+	rawWpm := stats.CalculateRawTypingSpeed(correct, incorrect, duration)
+	acc := stats.CalculateAccuracy(correct, len(target))
+
+	fmt.Printf("\r\nCongratulations Your typing speed is %.2f WPM\n", wpm)
+	fmt.Printf("\rYour raw typing speed is %.2f WPM\n", rawWpm)
+	fmt.Printf("\rYour accuracy is %.2f", acc)
 }
