@@ -5,11 +5,12 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui"
 )
 
 func main() {
-	target := "The quick brown fox jumps over the lazy dog."
+	target := typing.GetRandomQuote()
 	m := ui.NewModel(target)
 	p := tea.NewProgram(m)
 
