@@ -73,11 +73,11 @@ func (m Model) View() string {
 }
 
 func (m Model) resultsView() string {
-	s := "✨ Results ✨\n\n"
-	s += fmt.Sprintf("WPM:      %.2f\n", m.CalculateTypingSpeed())
-	s += fmt.Sprintf("Raw WPM:      %.2f\n", m.CalculateRawTypingSpeed())
+	s := "Couik\n\n"
+	s += fmt.Sprintf("Speed:      %.2fWPM\n", m.CalculateTypingSpeed())
+	s += fmt.Sprintf("Raw Speed:      %.2fWPM\n", m.CalculateRawTypingSpeed())
 	s += fmt.Sprintf("Accuracy: %.2f%%\n", m.CalculateAccuracy())
 	s += "\n[Press TAB to restart] • [Press ESC to quit]"
 
-	return s
+	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, s)
 }

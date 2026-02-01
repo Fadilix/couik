@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"fmt"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/pkg/typing"
 )
 
@@ -54,9 +56,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.Index >= len(m.Target) {
 				m.State = stateResults
 				m.EndTime = time.Now()
-				// return m, tea.Quit
+				// save to database
+				result := database.TestResult{
+					RawWPM:   m.CalculateRawTypingSpeed(),
+					WPM:      m.CalculateTypingSpeed(),
+					Acc:      m.CalculateAccuracy(),
+					Duration: m.EndTime.Sub(m.StartTime),
+					Quote:    m.Target,
+					Date:     time.Now(),
+				}
+				err := database.Save(result)
+				if err != nil {
+					fmt.Printf("an error occured while trying to save to db : %s\n", err)
+				}
 			}
-
 		}
 	}
 	return m, nil
