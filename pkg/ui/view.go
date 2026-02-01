@@ -51,7 +51,7 @@ func (m Model) View() string {
 			}
 		}
 		liveWpm = stats.CalculateTypingSpeed(correctCount, time.Since(m.StartTime))
-		liveAcc = stats.CalculateAccuracy(correctCount, m.Index)
+		liveAcc = stats.CalculateAccuracy(correctCount, m.Index, m.BackSpaceCount)
 	}
 
 	wpmDisplay := statsStyle.Render(fmt.Sprintf("WPM: %.2f", liveWpm))

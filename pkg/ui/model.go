@@ -25,6 +25,10 @@ type Model struct {
 	TerminalWidth  int
 	TerminalHeight int
 
+	// for better accuracy calculation
+	BackSpaceCount int
+	IsError        bool
+
 	// state
 	State sessionState
 
@@ -81,6 +85,6 @@ func (m Model) CalculateRawTypingSpeed() float64 {
 
 func (m Model) CalculateAccuracy() float64 {
 	correctChars := game.CountCorrect(m.Results)
-	acc := (float64(correctChars) / float64(len(m.Target))) * 100
+	acc := (float64(correctChars-m.BackSpaceCount) / float64(len(m.Target))) * 100
 	return acc
 }

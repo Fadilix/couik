@@ -12,7 +12,7 @@ func CalculateRawTypingSpeed(correctChars, incorrectChars int, duration time.Dur
 	return wpm
 }
 
-func CalculateAccuracy(correctChars, allChars int) float64 {
-	acc := (float64(correctChars) / float64(allChars)) * 100
+func CalculateAccuracy(correctChars, allChars, backspaceCount int) float64 {
+	acc := (float64(correctChars-backspaceCount) / float64(allChars)) * 100
 	return acc
 }
