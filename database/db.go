@@ -35,3 +35,20 @@ func Save(test TestResult) error {
 
 	return os.WriteFile(file, newData, 0o644)
 }
+
+func GetHistory() (History, error) {
+	file, err := getHistoryPath()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	var history History
+
+	json.Unmarshal(data, &history)
+	return history, nil
+}
