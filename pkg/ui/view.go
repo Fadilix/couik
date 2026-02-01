@@ -17,6 +17,10 @@ var (
 )
 
 func (m Model) View() string {
+	if m.State == stateResults {
+		return m.resultsView()
+	}
+
 	if m.Quitting {
 		return "Closing Couik...\n"
 	}
@@ -66,4 +70,14 @@ func (m Model) View() string {
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, content)
+}
+
+func (m Model) resultsView() string {
+	s := "Couik\n\n"
+	s += fmt.Sprintf("Speed:      %.2fWPM\n", m.CalculateTypingSpeed())
+	s += fmt.Sprintf("Raw Speed:      %.2fWPM\n", m.CalculateRawTypingSpeed())
+	s += fmt.Sprintf("Accuracy: %.2f%%\n", m.CalculateAccuracy())
+	s += "\n[Press TAB to restart] • [Press ESC to quit]"
+
+	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, s)
 }
