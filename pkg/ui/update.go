@@ -27,6 +27,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyBackspace:
 			if m.Index > 0 {
 				m.Index--
+				if m.IsError {
+					m.BackSpaceCount++
+				}
 			}
 
 		case tea.KeyTab:
@@ -49,6 +52,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if msg.Type == tea.KeySpace {
 					typedChar = " "
 				}
+
+				isCorrect := typedChar == string(m.Target[m.Index])
+
+				m.IsError = !isCorrect
+
 				m.Results[m.Index] = typedChar == string(m.Target[m.Index])
 				m.Index++
 			}
