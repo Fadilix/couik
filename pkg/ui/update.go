@@ -35,7 +35,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyTab:
 			if m.State == stateResults {
 				newTarget := typing.GetRandomQuote()
-				return NewModel(newTarget), nil
+
+				newModel := NewModel(newTarget)
+				newModel.TerminalHeight = m.TerminalHeight
+				newModel.TerminalWidth = m.TerminalWidth
+				newModel.ProgressBar.Width = m.ProgressBar.Width
+
+				return newModel, nil
 			}
 
 		case tea.KeyRunes, tea.KeySpace:
@@ -54,7 +60,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				isCorrect := typedChar == string(m.Target[m.Index])
-
 				m.IsError = !isCorrect
 
 				m.Results[m.Index] = typedChar == string(m.Target[m.Index])
