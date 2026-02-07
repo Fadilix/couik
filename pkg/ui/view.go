@@ -84,29 +84,73 @@ func (m Model) View() string {
 		return "Closing Couik...\n"
 	}
 
-	// Calculate the visible character window (approximately 5 lines worth)
-	textWidth := m.TerminalWidth - 50
-	if textWidth < 40 {
-		textWidth = 40
-	}
-	charsPerLine := textWidth
-	visibleChars := charsPerLine * 5 // ~5 lines of text
+	// Calculate dimensions
+	visibleLines := 3
+	textWidth := max(m.TerminalWidth-50, 40)
 
-	// Calculate the window start position (keep cursor in the middle-ish)
-	windowStart := m.Index - (visibleChars / 3)
-	if windowStart < 0 {
-		windowStart = 0
-	}
-	windowEnd := windowStart + visibleChars
-	if windowEnd > len(m.Target) {
-		windowEnd = len(m.Target)
-		windowStart = windowEnd - visibleChars
-		if windowStart < 0 {
-			windowStart = 0
+	var lineStarts []int
+	curr := 0
+	cursorLine := -1
+
+	for {
+		lineStarts = append(lineStarts, curr)
+
+		limit := curr + textWidth
+		if limit >= len(m.Target) {
+			if cursorLine == -1 && m.Index >= curr {
+				cursorLine = len(lineStarts) - 1
+			}
+			break
+		}
+
+		split := limit
+		foundSpace := false
+		for i := limit; i > curr; i-- {
+			if m.Target[i] == ' ' {
+				split = i + 1
+				foundSpace = true
+				break
+			}
+		}
+
+		if !foundSpace {
+			split = limit
+		}
+
+		if cursorLine == -1 {
+			if m.Index >= curr && m.Index < split {
+				cursorLine = len(lineStarts) - 1
+			}
+		}
+
+		curr = split
+		if curr >= len(m.Target) {
+			break
+		}
+
+		if cursorLine != -1 && len(lineStarts) > cursorLine+3 {
+			break
 		}
 	}
 
-	// Only render the visible portion of text
+	if cursorLine == -1 {
+		cursorLine = len(lineStarts) - 1
+	}
+
+	// Calculate window start and end based on lines
+	startLineIdx := cursorLine
+	startIdx := lineStarts[startLineIdx]
+
+	endIdx := len(m.Target)
+
+	lookaheadLines := 3
+	targetLineEndpoint := startLineIdx + lookaheadLines
+	if targetLineEndpoint < len(lineStarts) {
+		endIdx = lineStarts[targetLineEndpoint]
+	}
+
+	windowStart := startIdx
+	windowEnd := endIdx
 	var textArea strings.Builder
 	for i := windowStart; i < windowEnd; i++ {
 		s := string(m.Target[i])
@@ -152,7 +196,7 @@ func (m Model) View() string {
 	}
 	bar := m.ProgressBar.ViewAs(percent)
 
-	textAreaStyle := lipgloss.NewStyle().Width(textWidth).Height(5).Align(lipgloss.Left)
+	textAreaStyle := lipgloss.NewStyle().Width(textWidth).Height(visibleLines).Align(lipgloss.Left)
 	wrappedText := textAreaStyle.Render(textArea.String())
 
 	modeSelectorString := ""
@@ -181,7 +225,6 @@ func (m Model) View() string {
 
 
 %s
-
 
 
 %s
