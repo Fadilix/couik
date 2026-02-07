@@ -87,7 +87,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m.GetDictionnaryModel(m.initialTime), nil
 				}
 			}
-
+		case tea.KeyCtrlL:
+			if m.State == stateResults {
+				if m.Mode != timedMode {
+					return m.GetModelWithCustomTarget(m.Target), nil
+				}
+				return m.GetTimeModelWithCustomTarget(m.initialTime, m.Target), nil
+			}
 		case tea.KeyCtrlR:
 			if m.Mode == quoteMode {
 				return m.GetQuoteModel(), nil

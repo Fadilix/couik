@@ -276,7 +276,7 @@ func (m Model) resultsView() string {
 
 	// Footer Section
 	helpStyle := lipgloss.NewStyle().Foreground(catOverlay).MarginTop(1)
-	footer := helpStyle.Render("[TAB] restart • [SHIFT + TAB] change mode • [ESC] quit")
+	footer := helpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
 
 	modeSelectorString := ""
 
