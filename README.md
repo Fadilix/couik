@@ -60,7 +60,7 @@ tar -xzf couik_*_linux_amd64.tar.gz
 sudo mv couik /usr/local/bin/
 ```
 
-### Windows
+### Windows (Not stable yet. You can use wsl)
 1. Download the `.zip` archive from [Releases](https://github.com/fadilix/couik/releases).
 2. Extract and run `couik.exe`.
 3. (Optional) Add to your PATH for global access.
