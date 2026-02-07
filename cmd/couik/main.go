@@ -22,6 +22,11 @@ func main() {
 		return
 	}
 
+	if cli.Help {
+		cli.DisplayHelp()
+		return
+	}
+
 	target := typing.GetRandomQuote()
 	m := ui.NewModel(target)
 
@@ -35,6 +40,9 @@ func main() {
 			fmt.Printf("An error occurred while trying to retrieve text in your file %s\n", err)
 		}
 		target = quote
+		m = ui.NewModel(target)
+	} else if cli.Text != "" {
+		target = cli.Text
 		m = ui.NewModel(target)
 	}
 

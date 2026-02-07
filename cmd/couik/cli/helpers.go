@@ -24,3 +24,7 @@ func DisplayHistory() {
 		fmt.Println()
 	}
 }
+
+func DisplayHelp() {
+	RootCmd.Usage()
+}
