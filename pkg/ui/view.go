@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -52,10 +53,30 @@ var (
 			BorderForeground(catSurface)
 
 	headerStyle = lipgloss.NewStyle().Foreground(catLavender)
+
+	// Mode selector styles
+	modeActiveStyle = lipgloss.NewStyle().
+			Foreground(catSurface).
+			Background(catMauve).
+			Bold(true).
+			Padding(0, 2).
+			MarginRight(1)
+
+	modeInactiveStyle = lipgloss.NewStyle().
+				Foreground(catSubtext).
+				Background(catSurface).
+				Padding(0, 2).
+				MarginRight(1)
+
+	modeSelectorContainerStyle = lipgloss.NewStyle().
+					Border(lipgloss.RoundedBorder()).
+					BorderForeground(catOverlay).
+					Padding(0, 1).
+					MarginTop(1)
 )
 
 func (m Model) View() string {
-	if m.State == stateResults {
+	if m.State == stateResults || m.timeLeft <= 0 {
 		return m.resultsView()
 	}
 
@@ -63,24 +84,47 @@ func (m Model) View() string {
 		return "Closing Couik...\n"
 	}
 
-	var textArea string
-	for i, char := range m.Target {
-		s := string(char)
+	// Calculate the visible character window (approximately 5 lines worth)
+	textWidth := m.TerminalWidth - 50
+	if textWidth < 40 {
+		textWidth = 40
+	}
+	charsPerLine := textWidth
+	visibleChars := charsPerLine * 5 // ~5 lines of text
+
+	// Calculate the window start position (keep cursor in the middle-ish)
+	windowStart := m.Index - (visibleChars / 3)
+	if windowStart < 0 {
+		windowStart = 0
+	}
+	windowEnd := windowStart + visibleChars
+	if windowEnd > len(m.Target) {
+		windowEnd = len(m.Target)
+		windowStart = windowEnd - visibleChars
+		if windowStart < 0 {
+			windowStart = 0
+		}
+	}
+
+	// Only render the visible portion of text
+	var textArea strings.Builder
+	for i := windowStart; i < windowEnd; i++ {
+		s := string(m.Target[i])
 		switch {
 		case i < m.Index:
 			if m.Results[i] {
-				textArea += correctStyle.Render(s)
+				textArea.WriteString(correctStyle.Render(s))
 			} else {
 				if s == " " {
-					textArea += spaceStyle.Render(s)
+					textArea.WriteString(spaceStyle.Render(s))
 				} else {
-					textArea += wrongStyle.Render(s)
+					textArea.WriteString(wrongStyle.Render(s))
 				}
 			}
 		case i == m.Index:
-			textArea += highlightStyle.Render(s)
+			textArea.WriteString(highlightStyle.Render(s))
 		default:
-			textArea += pendingStyle.Render(s)
+			textArea.WriteString(pendingStyle.Render(s))
 		}
 	}
 
@@ -100,37 +144,72 @@ func (m Model) View() string {
 	accDisplay := statsStyle.Render(fmt.Sprintf("ACC: %.2f%%", liveAcc))
 	statsRow := lipgloss.JoinHorizontal(lipgloss.Top, wpmDisplay, accDisplay)
 
-	percent := float64(m.Index) / float64(len(m.Target))
+	var percent float64
+	if m.Mode == timedMode && m.initialTime > 0 {
+		percent = float64(m.initialTime-m.timeLeft) / float64(m.initialTime)
+	} else {
+		percent = float64(m.Index) / float64(len(m.Target))
+	}
 	bar := m.ProgressBar.ViewAs(percent)
 
-	textAreaStyle := lipgloss.NewStyle().Width(m.TerminalWidth - 50).Align(lipgloss.Left)
-	wrappedText := textAreaStyle.Render(textArea)
+	textAreaStyle := lipgloss.NewStyle().Width(textWidth).Height(5).Align(lipgloss.Left)
+	wrappedText := textAreaStyle.Render(textArea.String())
+
+	modeSelectorString := ""
+
+	if m.IsSelectingMode {
+		var modeButtons []string
+		for i, choice := range m.Choices {
+			var styledChoice string
+			if m.Cursor == i {
+				styledChoice = modeActiveStyle.Render(choice)
+			} else {
+				styledChoice = modeInactiveStyle.Render(choice)
+			}
+			modeButtons = append(modeButtons, styledChoice)
+		}
+		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, modeButtons...)
+		modeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+	}
+	timer := ""
+	if m.Mode == timedMode {
+		timer = fmt.Sprintf("%d\n", m.timeLeft)
+	}
 
 	content := fmt.Sprintf(
 		`%s
 
+
 %s
+
+
 
 %s
 
 %s
 
+%s
+%s
+%s
 %s`,
 		headerStyle.Render(CouikASCII3),
 		wrappedText,
 		statsRow,
 		bar,
-		lipgloss.NewStyle().Faint(true).Render("Press Esc to quit"),
+		lipgloss.NewStyle().Faint(true).Render("Press Esc to quit • [SHIFT + TAB] change mode"),
+		"\n",
+		timer,
+		modeSelectorString,
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, content)
 }
 
 func (m Model) resultsView() string {
-	// 1. Logo Section
+	// Logo Section
 	header := lipgloss.NewStyle().Foreground(catMauve).Bold(true).Render(CouikASCII3)
 
-	// 2. Stats Section - Using a box to make it stand out
+	// Stats Section - Using a box to make it stand out
 	statsTitleStyle := lipgloss.NewStyle().Foreground(catSapphire).Bold(true).MarginBottom(1)
 
 	// Individual stat styling
@@ -139,7 +218,7 @@ func (m Model) resultsView() string {
 
 	// Build the stats block
 	statsBox := lipgloss.JoinVertical(lipgloss.Left,
-		statsTitleStyle.Render("📊 SESSION PERFORMANCE"),
+		statsTitleStyle.Render("SESSION PERFORMANCE"),
 		fmt.Sprintf("%s %s", labelStyle.Render("Speed:"), valueStyle.Render(fmt.Sprintf("%.2f WPM", m.CalculateTypingSpeed()))),
 		fmt.Sprintf("%s %s", labelStyle.Render("Raw Speed:"), valueStyle.Render(fmt.Sprintf("%.2f WPM", m.CalculateRawTypingSpeed()))),
 		fmt.Sprintf("%s %s", labelStyle.Render("Accuracy:"), valueStyle.Render(fmt.Sprintf("%.2f%%", m.CalculateAccuracy()))),
@@ -152,17 +231,36 @@ func (m Model) resultsView() string {
 		Padding(1, 3).
 		Render(statsBox)
 
-	// 3. Footer Section
+	// Footer Section
 	helpStyle := lipgloss.NewStyle().Foreground(catOverlay).MarginTop(1)
-	footer := helpStyle.Render("[TAB] restart  •  [ESC] quit")
+	footer := helpStyle.Render("[TAB] restart • [SHIFT + TAB] change mode • [ESC] quit")
 
-	// 4. Final Assembly
+	modeSelectorString := ""
+
+	if m.IsSelectingMode {
+		var modeButtons []string
+		for i, choice := range m.Choices {
+			var styledChoice string
+			if m.Cursor == i {
+				styledChoice = modeActiveStyle.Render(choice)
+			} else {
+				styledChoice = modeInactiveStyle.Render(choice)
+			}
+			modeButtons = append(modeButtons, styledChoice)
+		}
+		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, modeButtons...)
+		modeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+	}
+
+	// Final Assembly
 	ui := lipgloss.JoinVertical(lipgloss.Center,
 		header,
 		"\n",
 		styledStats,
 		"\n",
 		footer,
+		"\n",
+		modeSelectorString,
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, ui)
