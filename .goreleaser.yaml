@@ -1,0 +1,104 @@
+version: 2
+
+project_name: couik
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - main: ./cmd/couik
+    binary: couik
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+# --- PACKAGE MANAGERS ---
+
+# Homebrew (macOS & Linux)
+# Required: A GitHub repo named 'homebrew-tap'
+brews:
+  - name: couik
+    repository:
+      owner: Fadilix
+      name: homebrew-tap
+    directory: Formula
+    homepage: "https://github.com/Fadilix/couik"
+    description: "A fast TUI typing game written in Go."
+    install: |
+      bin.install "couik"
+
+# Arch Linux (AUR)
+aurs:
+  - name: couik-bin
+    homepage: "https://github.com/Fadilix/couik"
+    description: "A fast TUI typing game written in Go (binary version)."
+    maintainers:
+      - "Fadilix <iamfadile2@gmail.com>"
+    license: "MIT"
+    # To enable automatic publishing to AUR:
+    # 1. Create an SSH key pair (ssh-keygen -t ed25519 -f aur_key)
+    # 2. Add public key to your AUR account
+    # 3. Add private key content to AUR_KEY secret in GitHub Actions
+    # 4. Uncomment the lines below:
+    # private_key: '{{ .Env.AUR_KEY }}'
+    # git_url: 'ssh://aur@aur.archlinux.org/couik-bin.git'
+    
+    # Or publish to a separate repo that contains the PKGBUILD:
+    package: |-
+      # bin
+      install -Dm755 "./couik" "${pkgdir}/usr/bin/couik"
+      # license
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/couik/LICENSE"
+      # readme
+      install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/couik/README.md"
+
+# Linux Packages (.deb and .rpm for Debian/Ubuntu/Fedora)
+nfpms:
+  - file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - deb
+      - rpm
+    vendor: "Fadilix"
+    maintainer: "Fadilix <iamfadile2@gmail.com>"
+    description: "A fast TUI typing game written in Go."
+    license: "MIT"
+    contents:
+      - src: ./LICENSE
+        dst: /usr/share/licenses/couik/LICENSE
+      - src: ./README.md
+        dst: /usr/share/doc/couik/README.md
+
+# --- POST-PROCESSING ---
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  footer: >-
+    ---
+    Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
