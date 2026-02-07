@@ -6,11 +6,23 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
-	"github.com/fadilix/couik/pkg/typing"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tickMsg:
+		if m.Mode == timedMode {
+			m.timeLeft--
+			// Check if time is up AFTER decrementing to avoid delay at the end
+			if m.timeLeft <= 0 {
+				m.Active = false
+				m.State = stateResults
+				m.EndTime = time.Now()
+				return m, nil
+			}
+			return m, tick()
+		}
+
 	case tea.WindowSizeMsg:
 		m.TerminalWidth = msg.Width
 		m.TerminalHeight = msg.Height
@@ -19,6 +31,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		switch msg.String() {
+		case "l", "right":
+			if m.Cursor < len(m.Choices)-1 {
+				m.Cursor++
+			}
+		case "h", "left":
+			if m.Cursor > 0 {
+				m.Cursor--
+			}
+
+		case "enter":
+			selected := m.Choices[m.Cursor]
+			switch selected {
+			case "15s":
+				return m.GetDictionnaryModel(15), nil
+			case "30s":
+				return m.GetDictionnaryModel(30), nil
+			case "60s":
+				return m.GetDictionnaryModel(60), nil
+			case "120s":
+				return m.GetDictionnaryModel(120), nil
+			case "quote":
+				return m.GetQuoteModel(), nil
+			}
+		}
+
 		switch msg.Type {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			m.Quitting = true
@@ -31,23 +69,41 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.BackSpaceCount++
 				}
 			}
+		case tea.KeyShiftTab:
+			m.IsSelectingMode = !m.IsSelectingMode
 
 		case tea.KeyTab:
 			if m.State == stateResults {
-				newTarget := typing.GetRandomQuote()
+				if m.Mode == quoteMode {
+					return m.GetQuoteModel(), nil
+				} else {
+					return m.GetDictionnaryModel(m.initialTime), nil
+				}
+			}
 
-				newModel := NewModel(newTarget)
-				newModel.TerminalHeight = m.TerminalHeight
-				newModel.TerminalWidth = m.TerminalWidth
-				newModel.ProgressBar.Width = m.ProgressBar.Width
-
-				return newModel, nil
+		case tea.KeyCtrlR:
+			if m.Mode == quoteMode {
+				return m.GetQuoteModel(), nil
+			} else {
+				return m.GetDictionnaryModel(m.initialTime), nil
 			}
 
 		case tea.KeyRunes, tea.KeySpace:
+			if m.IsSelectingMode {
+				return m, nil
+			}
+
 			if m.State == stateResults {
 				return m, nil
 			}
+
+			// Track if we need to start the timer
+			var startTimer bool
+			if !m.Active && m.Mode == timedMode {
+				m.Active = true
+				startTimer = true
+			}
+
 			if !m.Started {
 				m.StartTime = time.Now()
 				m.Started = true
@@ -82,6 +138,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					fmt.Printf("an error occured while trying to save to db : %s\n", err)
 				}
+			}
+
+			// Start the timer if needed
+			if startTimer {
+				return m, tick()
 			}
 		}
 	}
