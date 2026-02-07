@@ -202,6 +202,30 @@ func (m Model) GetDictionnaryModelWithWords(words int) Model {
 	return newModel
 }
 
+func (m Model) GetModelWithCustomTarget(target string) Model {
+	newModel := NewModel(target)
+	newModel.TerminalHeight = m.TerminalHeight
+	newModel.TerminalWidth = m.TerminalWidth
+	newModel.ProgressBar.Width = m.ProgressBar.Width
+	newModel.Mode = wordMode
+	newModel.InitialWords = len(target)
+
+	return newModel
+}
+
+func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Model {
+	newModel := NewModel(target)
+	newModel.TerminalHeight = m.TerminalHeight
+	newModel.TerminalWidth = m.TerminalWidth
+	newModel.ProgressBar.Width = m.ProgressBar.Width
+	newModel.timeLeft = initialTime
+	newModel.Mode = timedMode
+	newModel.InitialWords = len(target)
+	newModel.initialTime = initialTime
+
+	return newModel
+}
+
 func tick() tea.Cmd {
 	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
 		return tickMsg(t)
