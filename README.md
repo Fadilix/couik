@@ -9,7 +9,10 @@
 [![AUR version](https://img.shields.io/aur/version/couik-bin)](https://aur.archlinux.org/packages/couik-bin)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fadilix/couik)](https://github.com/fadilix/couik/releases)
 
-![Demo](https://vhs.charm.sh/vhs-2jdL3lZ9yX4vGk5n1vWqQ.gif)
+####
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/683b8898-9d75-48ee-888f-e808a3c738ef" />
+
+####
 
 </div>
 
