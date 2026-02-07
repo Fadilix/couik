@@ -2,6 +2,7 @@ package typing
 
 import (
 	"math/rand"
+	"os"
 	"strings"
 )
 
@@ -75,4 +76,12 @@ func GetDictionnary() string {
 		dictionnary[i], dictionnary[j] = dictionnary[j], dictionnary[i]
 	})
 	return strings.Join(dictionnary, " ")
+}
+
+func GetQuoteFromFile(filepath string) (string, error) {
+	quote, err := os.ReadFile(filepath)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(quote)), nil
 }

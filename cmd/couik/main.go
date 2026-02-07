@@ -29,6 +29,13 @@ func main() {
 		m = m.GetDictionnaryModelWithWords(cli.Words)
 	} else if cli.Time > 0 {
 		m = m.GetDictionnaryModel(cli.Time)
+	} else if cli.File != "" {
+		quote, err := typing.GetQuoteFromFile(cli.File)
+		if err != nil {
+			fmt.Printf("An error occurred while trying to retrieve text in your file %s\n", err)
+		}
+		target = quote
+		m = ui.NewModel(target)
 	}
 
 	p := tea.NewProgram(m)
