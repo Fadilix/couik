@@ -24,6 +24,13 @@ func main() {
 
 	target := typing.GetRandomQuote()
 	m := ui.NewModel(target)
+
+	if cli.Words > 0 {
+		m = m.GetDictionnaryModelWithWords(cli.Words)
+	} else if cli.Time > 0 {
+		m = m.GetDictionnaryModel(cli.Time)
+	}
+
 	p := tea.NewProgram(m)
 
 	if _, err := p.Run(); err != nil {
