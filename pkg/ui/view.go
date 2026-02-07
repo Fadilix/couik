@@ -183,7 +183,6 @@ func (m Model) View() string {
 %s
 
 
-
 %s
 
 %s

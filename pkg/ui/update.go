@@ -54,6 +54,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.GetDictionnaryModel(120), nil
 			case "quote":
 				return m.GetQuoteModel(), nil
+			case "words 10":
+				return m.GetDictionnaryModelWithWords(10), nil
+			case "words 25":
+				return m.GetDictionnaryModelWithWords(25), nil
 			}
 		}
 
@@ -74,9 +78,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.KeyTab:
 			if m.State == stateResults {
-				if m.Mode == quoteMode {
+				switch m.Mode {
+				case quoteMode:
 					return m.GetQuoteModel(), nil
-				} else {
+				case wordMode:
+					return m.GetDictionnaryModelWithWords(m.InitialWords), nil
+				default:
 					return m.GetDictionnaryModel(m.initialTime), nil
 				}
 			}

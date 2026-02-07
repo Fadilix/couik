@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -19,6 +20,7 @@ const (
 	unselectedMode TypingMode = iota
 	timedMode
 	quoteMode
+	wordMode
 )
 
 const (
@@ -55,6 +57,9 @@ type Model struct {
 	timeLeft    int
 	initialTime int // Store the initial time duration for progress calculation
 	Active      bool
+
+	// words
+	InitialWords int
 }
 
 func NewModel(target string) Model {
@@ -70,7 +75,7 @@ func NewModel(target string) Model {
 		Target:      target,
 		Results:     make([]bool, len(target)),
 		ProgressBar: p,
-		Choices:     []string{"15s", "30s", "60s", "120s", "quote"},
+		Choices:     []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
 		timeLeft:    30,
 		initialTime: 30,
 		Mode:        quoteMode, // Default to quote mode since we start with a random quote
@@ -168,6 +173,31 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 	newModel.timeLeft = duration
 	newModel.initialTime = duration
 	newModel.Mode = timedMode
+
+	return newModel
+}
+
+func (m Model) GetDictionnaryModelWithWords(words int) Model {
+	var newTarget strings.Builder
+	dictionnary := typing.GetDictionnary()
+
+	wordCount := 0
+
+	for i := range dictionnary {
+		if string(dictionnary[i]) == " " {
+			wordCount++
+			if wordCount == words {
+				break
+			}
+		}
+		newTarget.WriteString(string(dictionnary[i]))
+	}
+	newModel := NewModel(newTarget.String())
+	newModel.TerminalHeight = m.TerminalHeight
+	newModel.TerminalWidth = m.TerminalWidth
+	newModel.ProgressBar.Width = m.ProgressBar.Width
+	newModel.Mode = wordMode
+	newModel.InitialWords = words
 
 	return newModel
 }
