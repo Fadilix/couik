@@ -3,20 +3,22 @@ package database
 type Category int
 
 const (
-	small Category = iota
-	mid
-	thicc
+	Small Category = iota
+	Mid
+	Thicc
 )
 
-func getQuotes(lang Language, category Category) []Quote {
+// GetQuotes loads quotes the embedded data and returns
+// a list of quotes according to the language and category
+func GetQuotes(lang Language, category Category) []Quote {
 	var maxLength int
 
 	switch category {
-	case small:
+	case Small:
 		maxLength = 25
-	case mid:
+	case Mid:
 		maxLength = 60
-	case thicc:
+	case Thicc:
 		maxLength = 9999
 	}
 

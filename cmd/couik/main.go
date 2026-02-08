@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/cmd/couik/cli"
+	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui"
 )
@@ -27,7 +28,9 @@ func main() {
 		return
 	}
 
-	target := typing.GetRandomQuote()
+	randomQuote := typing.GetQuoteUseCase(database.French, database.Mid)
+	target := randomQuote.Text
+
 	m := ui.NewModel(target)
 
 	if cli.Words > 0 {
