@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/internal/game"
 	"github.com/fadilix/couik/pkg/typing"
 )
@@ -14,6 +15,7 @@ type tickMsg time.Time
 
 type sessionState int
 
+// Typing mode
 type TypingMode int
 
 const (
@@ -23,13 +25,22 @@ const (
 	wordMode
 )
 
+// Quote mode (small, mid, thicc)
+type quoteType int
+
+const (
+	small quoteType = iota
+	mid
+	thicc
+)
+
 const (
 	stateTyping sessionState = iota
 	stateResults
 )
 
 type Model struct {
-	Target         string
+	Target         []rune
 	Results        []bool
 	Index          int
 	Started        bool
@@ -58,6 +69,12 @@ type Model struct {
 	initialTime int // Store the initial time duration for progress calculation
 	Active      bool
 
+	// quote mode selection
+	QuoteType            quoteType
+	QuoteTypeCursor      int
+	QuoteTypeChoices     []string
+	IsSelectingQuoteType bool
+
 	// words
 	InitialWords int
 }
@@ -71,14 +88,18 @@ func NewModel(target string) Model {
 	p.Full = '━'
 	p.Empty = '─'
 
+	targetRunes := []rune(target)
+
 	return Model{
-		Target:      target,
-		Results:     make([]bool, len(target)),
-		ProgressBar: p,
-		Choices:     []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
-		timeLeft:    30,
-		initialTime: 30,
-		Mode:        quoteMode, // Default to quote mode since we start with a random quote
+		Target:           targetRunes,
+		Results:          make([]bool, len(targetRunes)),
+		ProgressBar:      p,
+		Choices:          []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
+		timeLeft:         30,
+		initialTime:      30,
+		Mode:             quoteMode, // Default to quote mode since we start with a random quote
+		QuoteType:        mid,       // default to mid
+		QuoteTypeChoices: []string{"small", "mid", "thicc"},
 	}
 }
 
@@ -151,9 +172,10 @@ func (m Model) CalculateAccuracy() float64 {
 }
 
 func (m Model) GetQuoteModel() Model {
-	newTarget := typing.GetRandomQuote()
+	quote := typing.GetQuoteUseCase(database.English, database.Mid)
+	target := quote.Text
 
-	newModel := NewModel(newTarget)
+	newModel := NewModel(target)
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
@@ -212,7 +234,7 @@ func (m Model) GetModelWithCustomTarget(target string) Model {
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
 	newModel.Mode = wordMode
-	newModel.InitialWords = len(target)
+	newModel.InitialWords = len([]rune(target))
 
 	return newModel
 }
@@ -226,8 +248,33 @@ func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Mode
 	newModel.ProgressBar.Width = m.ProgressBar.Width
 	newModel.timeLeft = initialTime
 	newModel.Mode = timedMode
-	newModel.InitialWords = len(target)
+	newModel.InitialWords = len([]rune(target))
 	newModel.initialTime = initialTime
+
+	return newModel
+}
+
+func (m Model) GetModelWithQuoteType(option string) Model {
+	var category database.Category
+
+	switch option {
+	case "mid":
+		category = database.Mid
+	case "thicc":
+		category = database.Thicc
+	default:
+		category = database.Small
+	}
+
+	target := typing.GetQuoteUseCase(database.English, category)
+	quote := target.Text
+
+	newModel := NewModel(quote)
+
+	newModel.TerminalHeight = m.TerminalHeight
+	newModel.TerminalWidth = m.TerminalWidth
+	newModel.ProgressBar.Width = m.ProgressBar.Width
+	newModel.Mode = quoteMode
 
 	return newModel
 }

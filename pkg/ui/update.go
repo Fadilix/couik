@@ -33,31 +33,59 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "l", "right":
-			if m.Cursor < len(m.Choices)-1 {
-				m.Cursor++
+			if m.IsSelectingMode {
+				if m.Cursor < len(m.Choices)-1 {
+					m.Cursor++
+				}
+			} else if m.IsSelectingQuoteType {
+				if m.QuoteTypeCursor < len(m.QuoteTypeChoices)-1 {
+					m.QuoteTypeCursor++
+				}
 			}
 		case "h", "left":
-			if m.Cursor > 0 {
-				m.Cursor--
+			if m.IsSelectingMode {
+				if m.Cursor > 0 {
+					m.Cursor--
+				}
+			} else if m.IsSelectingQuoteType {
+				if m.QuoteTypeCursor > 0 {
+					m.QuoteTypeCursor--
+				}
 			}
 
 		case "enter":
-			selected := m.Choices[m.Cursor]
-			switch selected {
-			case "15s":
-				return m.GetDictionnaryModel(15), nil
-			case "30s":
-				return m.GetDictionnaryModel(30), nil
-			case "60s":
-				return m.GetDictionnaryModel(60), nil
-			case "120s":
-				return m.GetDictionnaryModel(120), nil
-			case "quote":
-				return m.GetQuoteModel(), nil
-			case "words 10":
-				return m.GetDictionnaryModelWithWords(10), nil
-			case "words 25":
-				return m.GetDictionnaryModelWithWords(25), nil
+			if m.IsSelectingMode {
+				selected := m.Choices[m.Cursor]
+				switch selected {
+				case "15s":
+					return m.GetDictionnaryModel(15), nil
+				case "30s":
+					return m.GetDictionnaryModel(30), nil
+				case "60s":
+					return m.GetDictionnaryModel(60), nil
+				case "120s":
+					return m.GetDictionnaryModel(120), nil
+				case "quote":
+					return m.GetQuoteModel(), nil
+				case "words 10":
+					return m.GetDictionnaryModelWithWords(10), nil
+				case "words 25":
+					return m.GetDictionnaryModelWithWords(25), nil
+				}
+			} else if m.IsSelectingQuoteType {
+				selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
+
+				switch selected {
+				case "small":
+					m.QuoteType = small
+					return m.GetModelWithQuoteType("small"), nil
+				case "mid":
+					m.QuoteType = mid
+					return m.GetModelWithQuoteType("mid"), nil
+				case "thicc":
+					m.QuoteType = thicc
+					return m.GetModelWithQuoteType("thicc"), nil
+				}
 			}
 		}
 
@@ -65,6 +93,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			m.Quitting = true
 			return m, tea.Quit
+
+		case tea.KeyCtrlE:
+			m.IsSelectingQuoteType = !m.IsSelectingQuoteType
 
 		case tea.KeyBackspace:
 			if m.Index > 0 {
@@ -90,13 +121,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlL:
 			if m.State == stateResults {
 				if m.Mode != timedMode {
-					return m.GetModelWithCustomTarget(m.Target), nil
+					return m.GetModelWithCustomTarget(string(m.Target)), nil
 				}
-				return m.GetTimeModelWithCustomTarget(m.initialTime, m.Target), nil
+				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Target)), nil
 			}
 		case tea.KeyCtrlR:
 			if m.Mode == quoteMode {
-				return m.GetQuoteModel(), nil
+				var option string
+				switch m.QuoteType {
+				case mid:
+					option = "mid"
+				case thicc:
+					option = "thicc"
+				default:
+					option = "small"
+				}
+				return m.GetModelWithQuoteType(option), nil
 			} else {
 				return m.GetDictionnaryModel(m.initialTime), nil
 			}
@@ -144,7 +184,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					WPM:      m.CalculateTypingSpeed(),
 					Acc:      m.CalculateAccuracy(),
 					Duration: m.EndTime.Sub(m.StartTime),
-					Quote:    m.Target,
+					Quote:    string(m.Target),
 					Date:     time.Now(),
 				}
 				err := database.Save(result)
