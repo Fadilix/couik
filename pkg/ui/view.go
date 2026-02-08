@@ -200,6 +200,7 @@ func (m Model) View() string {
 	wrappedText := textAreaStyle.Render(textArea.String())
 
 	modeSelectorString := ""
+	quoteTypeSelectorString := ""
 
 	if m.IsSelectingMode {
 		var modeButtons []string
@@ -215,6 +216,22 @@ func (m Model) View() string {
 		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, modeButtons...)
 		modeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
 	}
+
+	if m.IsSelectingQuoteType {
+		var quoteTypeButtons []string
+		for i, choice := range m.QuoteTypeChoices {
+			var styledChoice string
+			if m.QuoteTypeCursor == i {
+				styledChoice = modeActiveStyle.Render(choice)
+			} else {
+				styledChoice = modeInactiveStyle.Render(choice)
+			}
+			quoteTypeButtons = append(quoteTypeButtons, styledChoice)
+		}
+		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, quoteTypeButtons...)
+		quoteTypeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+	}
+
 	timer := ""
 	if m.Mode == timedMode {
 		timer = fmt.Sprintf("%d\n", m.timeLeft)
@@ -234,6 +251,7 @@ func (m Model) View() string {
 %s
 %s
 %s
+%s
 %s`,
 		headerStyle.Render(CouikASCII3),
 		wrappedText,
@@ -243,6 +261,7 @@ func (m Model) View() string {
 		"\n",
 		timer,
 		modeSelectorString,
+		quoteTypeSelectorString,
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, content)
@@ -279,6 +298,7 @@ func (m Model) resultsView() string {
 	footer := helpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
 
 	modeSelectorString := ""
+	quoteTypeSelectorString := ""
 
 	if m.IsSelectingMode {
 		var modeButtons []string
@@ -295,6 +315,21 @@ func (m Model) resultsView() string {
 		modeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
 	}
 
+	if m.IsSelectingQuoteType {
+		var quoteTypeButtons []string
+		for i, choice := range m.QuoteTypeChoices {
+			var styledChoice string
+			if m.QuoteTypeCursor == i {
+				styledChoice = modeActiveStyle.Render(choice)
+			} else {
+				styledChoice = modeInactiveStyle.Render(choice)
+			}
+			quoteTypeButtons = append(quoteTypeButtons, styledChoice)
+		}
+		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, quoteTypeButtons...)
+		quoteTypeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+	}
+
 	// Final Assembly
 	ui := lipgloss.JoinVertical(lipgloss.Center,
 		header,
@@ -304,6 +339,7 @@ func (m Model) resultsView() string {
 		footer,
 		"\n",
 		modeSelectorString,
+		quoteTypeSelectorString,
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, ui)

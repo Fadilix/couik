@@ -12,14 +12,18 @@ const (
 // a list of quotes according to the language and category
 func GetQuotes(lang Language, category Category) []Quote {
 	var maxLength int
+	var minLength int
 
 	switch category {
 	case Small:
-		maxLength = 25
+		minLength = 0
+		maxLength = 150
 	case Mid:
-		maxLength = 60
+		minLength = 150
+		maxLength = 400
 	case Thicc:
-		maxLength = 9999
+		minLength = 400
+		maxLength = 99999
 	}
 
 	quoteData := LoadEmbeddedQuotes(lang)
@@ -27,7 +31,7 @@ func GetQuotes(lang Language, category Category) []Quote {
 	var finalQuotes []Quote
 
 	for _, quote := range quoteData.Quotes {
-		if quote.Length <= maxLength {
+		if quote.Length <= maxLength && quote.Length >= minLength {
 			finalQuotes = append(finalQuotes, quote)
 		}
 	}

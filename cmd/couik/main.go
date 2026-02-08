@@ -28,7 +28,7 @@ func main() {
 		return
 	}
 
-	randomQuote := typing.GetQuoteUseCase(database.French, database.Mid)
+	randomQuote := typing.GetQuoteUseCase(database.English, database.Mid)
 	target := randomQuote.Text
 
 	m := ui.NewModel(target)
