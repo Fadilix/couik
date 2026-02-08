@@ -15,6 +15,7 @@ type tickMsg time.Time
 
 type sessionState int
 
+// Typing mode
 type TypingMode int
 
 const (
@@ -22,6 +23,15 @@ const (
 	timedMode
 	quoteMode
 	wordMode
+)
+
+// Quote mode (small, mid, thicc)
+type quoteType int
+
+const (
+	small quoteType = iota
+	mid
+	thicc
 )
 
 const (
@@ -59,6 +69,12 @@ type Model struct {
 	initialTime int // Store the initial time duration for progress calculation
 	Active      bool
 
+	// quote mode selection
+	QuoteType            quoteType
+	QuoteTypeCursor      int
+	QuoteTypeChoices     []string
+	IsSelectingQuoteType bool
+
 	// words
 	InitialWords int
 }
@@ -75,13 +91,15 @@ func NewModel(target string) Model {
 	targetRunes := []rune(target)
 
 	return Model{
-		Target:      targetRunes,
-		Results:     make([]bool, len(targetRunes)),
-		ProgressBar: p,
-		Choices:     []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
-		timeLeft:    30,
-		initialTime: 30,
-		Mode:        quoteMode, // Default to quote mode since we start with a random quote
+		Target:           targetRunes,
+		Results:          make([]bool, len(targetRunes)),
+		ProgressBar:      p,
+		Choices:          []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
+		timeLeft:         30,
+		initialTime:      30,
+		Mode:             quoteMode, // Default to quote mode since we start with a random quote
+		QuoteType:        mid,       // default to mid
+		QuoteTypeChoices: []string{"small", "mid", "thicc"},
 	}
 }
 
@@ -154,7 +172,7 @@ func (m Model) CalculateAccuracy() float64 {
 }
 
 func (m Model) GetQuoteModel() Model {
-	quote := typing.GetQuoteUseCase(database.French, database.Mid)
+	quote := typing.GetQuoteUseCase(database.English, database.Mid)
 	target := quote.Text
 
 	newModel := NewModel(target)
@@ -232,6 +250,31 @@ func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Mode
 	newModel.Mode = timedMode
 	newModel.InitialWords = len([]rune(target))
 	newModel.initialTime = initialTime
+
+	return newModel
+}
+
+func (m Model) GetModelWithQuoteType(option string) Model {
+	var category database.Category
+
+	switch option {
+	case "mid":
+		category = database.Mid
+	case "thicc":
+		category = database.Thicc
+	default:
+		category = database.Small
+	}
+
+	target := typing.GetQuoteUseCase(database.English, category)
+	quote := target.Text
+
+	newModel := NewModel(quote)
+
+	newModel.TerminalHeight = m.TerminalHeight
+	newModel.TerminalWidth = m.TerminalWidth
+	newModel.ProgressBar.Width = m.ProgressBar.Width
+	newModel.Mode = quoteMode
 
 	return newModel
 }
