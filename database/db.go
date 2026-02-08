@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// Save saves test result to
+// $CONFIG_PATH/couik/history.json
 func Save(test TestResult) error {
 	var history History
 	file, err := getHistoryPath()
@@ -36,6 +38,7 @@ func Save(test TestResult) error {
 	return os.WriteFile(file, newData, 0o644)
 }
 
+// GetHistory retrieves the history of your typing tests
 func GetHistory() (History, error) {
 	file, err := getHistoryPath()
 	if err != nil {
