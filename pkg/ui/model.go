@@ -177,6 +177,8 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 	return newModel
 }
 
+// GetDictionnaryModelWithWords creates a model with custom words length
+// for word mode typing tests
 func (m Model) GetDictionnaryModelWithWords(words int) Model {
 	var newTarget strings.Builder
 	dictionnary := typing.GetDictionnary()
@@ -202,6 +204,8 @@ func (m Model) GetDictionnaryModelWithWords(words int) Model {
 	return newModel
 }
 
+// GetModelWithCustomTarget creates a model with custom target
+// for word mode typing tests
 func (m Model) GetModelWithCustomTarget(target string) Model {
 	newModel := NewModel(target)
 	newModel.TerminalHeight = m.TerminalHeight
@@ -213,6 +217,8 @@ func (m Model) GetModelWithCustomTarget(target string) Model {
 	return newModel
 }
 
+// GetTimeModelWithCustomTarget creates a model with custom target
+// for time mode typing tests
 func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Model {
 	newModel := NewModel(target)
 	newModel.TerminalHeight = m.TerminalHeight
