@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/fadilix/couik/database"
 	"gopkg.in/yaml.v3"
@@ -78,4 +79,12 @@ func SetConfig(key, value string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func GetTextFromFile(filepath string) (string, error) {
+	quote, err := os.ReadFile(filepath)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(quote)), nil
 }

@@ -81,7 +81,8 @@ type Model struct {
 	InitialWords int
 
 	// User defaults
-	config cli.Config
+	// config cli.Config
+	CustomDashboard string
 }
 
 func NewModel(target string) Model {
@@ -100,13 +101,19 @@ func NewModel(target string) Model {
 	defaultTMode := quoteMode
 	defaultQT := mid
 	defaultInitTime := 30
+	defaultDashboard := ""
 
 	// load the user config
 	config := cli.GetConfig()
 
+	if database.FileExists(config.DashboardASCII) {
+		dashboard, _ := cli.GetTextFromFile(config.DashboardASCII)
+		defaultDashboard = dashboard
+	}
+
 	if !slices.Contains(typingModes, config.Time) {
 		switch config.Time {
-		case "15s":
+		case "s":
 			defaultInitTime = 15
 		case "30s":
 			defaultInitTime = 30
@@ -137,6 +144,7 @@ func NewModel(target string) Model {
 		QuoteType:        defaultQT,    // default to mid
 		InitialWords:     50,
 		QuoteTypeChoices: qType,
+		CustomDashboard:  defaultDashboard,
 	}
 }
 

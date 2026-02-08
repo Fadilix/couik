@@ -75,6 +75,8 @@ var (
 					MarginTop(1)
 )
 
+var dashboardLogo string = CouikASCII3
+
 func (m Model) View() string {
 	if m.State == stateResults || m.timeLeft <= 0 {
 		return m.resultsView()
@@ -237,6 +239,12 @@ func (m Model) View() string {
 		timer = fmt.Sprintf("%d\n", m.timeLeft)
 	}
 
+	renderedLogo := dashboardLogo
+
+	if m.CustomDashboard != "" {
+		renderedLogo = m.CustomDashboard
+	}
+
 	content := fmt.Sprintf(
 		`%s
 
@@ -253,7 +261,7 @@ func (m Model) View() string {
 %s
 %s
 %s`,
-		headerStyle.Render(CouikASCII3),
+		headerStyle.Render(renderedLogo),
 		wrappedText,
 		statsRow,
 		bar,
@@ -268,8 +276,14 @@ func (m Model) View() string {
 }
 
 func (m Model) resultsView() string {
+	renderedLogo := dashboardLogo
+
+	if m.CustomDashboard != "" {
+		renderedLogo = m.CustomDashboard
+	}
+
 	// Logo Section
-	header := lipgloss.NewStyle().Foreground(catMauve).Bold(true).Render(CouikASCII3)
+	header := lipgloss.NewStyle().Foreground(catMauve).Bold(true).Render(renderedLogo)
 
 	// Stats Section - Using a box to make it stand out
 	statsTitleStyle := lipgloss.NewStyle().Foreground(catSapphire).Bold(true).MarginBottom(1)
