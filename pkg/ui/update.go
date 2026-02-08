@@ -90,9 +90,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlL:
 			if m.State == stateResults {
 				if m.Mode != timedMode {
-					return m.GetModelWithCustomTarget(m.Target), nil
+					return m.GetModelWithCustomTarget(string(m.Target)), nil
 				}
-				return m.GetTimeModelWithCustomTarget(m.initialTime, m.Target), nil
+				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Target)), nil
 			}
 		case tea.KeyCtrlR:
 			if m.Mode == quoteMode {
@@ -144,7 +144,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					WPM:      m.CalculateTypingSpeed(),
 					Acc:      m.CalculateAccuracy(),
 					Duration: m.EndTime.Sub(m.StartTime),
-					Quote:    m.Target,
+					Quote:    string(m.Target),
 					Date:     time.Now(),
 				}
 				err := database.Save(result)

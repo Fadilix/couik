@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/internal/game"
 	"github.com/fadilix/couik/pkg/typing"
 )
@@ -29,7 +30,7 @@ const (
 )
 
 type Model struct {
-	Target         string
+	Target         []rune
 	Results        []bool
 	Index          int
 	Started        bool
@@ -71,9 +72,11 @@ func NewModel(target string) Model {
 	p.Full = '━'
 	p.Empty = '─'
 
+	targetRunes := []rune(target)
+
 	return Model{
-		Target:      target,
-		Results:     make([]bool, len(target)),
+		Target:      targetRunes,
+		Results:     make([]bool, len(targetRunes)),
 		ProgressBar: p,
 		Choices:     []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
 		timeLeft:    30,
@@ -151,9 +154,10 @@ func (m Model) CalculateAccuracy() float64 {
 }
 
 func (m Model) GetQuoteModel() Model {
-	newTarget := typing.GetRandomQuote()
+	quote := typing.GetQuoteUseCase(database.French, database.Mid)
+	target := quote.Text
 
-	newModel := NewModel(newTarget)
+	newModel := NewModel(target)
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
@@ -212,7 +216,7 @@ func (m Model) GetModelWithCustomTarget(target string) Model {
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
 	newModel.Mode = wordMode
-	newModel.InitialWords = len(target)
+	newModel.InitialWords = len([]rune(target))
 
 	return newModel
 }
@@ -226,7 +230,7 @@ func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Mode
 	newModel.ProgressBar.Width = m.ProgressBar.Width
 	newModel.timeLeft = initialTime
 	newModel.Mode = timedMode
-	newModel.InitialWords = len(target)
+	newModel.InitialWords = len([]rune(target))
 	newModel.initialTime = initialTime
 
 	return newModel

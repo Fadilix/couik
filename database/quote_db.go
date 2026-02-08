@@ -18,16 +18,18 @@ var (
 type Language int
 
 const (
-	french Language = iota
-	english
+	French Language = iota
+	English
 )
 
+// LoadEmbeddedQuotes loads data from json files
+// according to the language (english and french for now)
 func LoadEmbeddedQuotes(lang Language) TypingData {
 	var quotes TypingData
 	var quotesData []byte // from json
 
 	switch lang {
-	case french:
+	case French:
 		quotesData = frenchQuotes
 	default:
 		quotesData = englishQuotes
