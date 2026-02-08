@@ -126,7 +126,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Target)), nil
 			}
 		case tea.KeyCtrlR:
-			if m.Mode == quoteMode {
+			switch m.Mode {
+			case quoteMode:
 				var option string
 				switch m.QuoteType {
 				case mid:
@@ -137,8 +138,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					option = "small"
 				}
 				return m.GetModelWithQuoteType(option), nil
-			} else {
+			case timedMode:
 				return m.GetDictionnaryModel(m.initialTime), nil
+			default:
+				return m.GetDictionnaryModelWithWords(m.InitialWords), nil
 			}
 
 		case tea.KeyRunes, tea.KeySpace:

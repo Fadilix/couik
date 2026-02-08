@@ -9,12 +9,12 @@ import (
 // $CONFIG_PATH/couik/history.json
 func Save(test TestResult) error {
 	var history History
-	file, err := getHistoryPath()
+	file, err := GetPath(Historyy)
 	if err != nil {
 		return err
 	}
 
-	if !fileExists(file) {
+	if !FileExists(file) {
 		initialData := "[]"
 		os.WriteFile(file, []byte(initialData), 0o644)
 	}
@@ -40,7 +40,7 @@ func Save(test TestResult) error {
 
 // GetHistory retrieves the history of your typing tests
 func GetHistory() (History, error) {
-	file, err := getHistoryPath()
+	file, err := GetPath(Historyy)
 	if err != nil {
 		return nil, err
 	}

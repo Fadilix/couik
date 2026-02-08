@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func fileExists(filename string) bool {
+func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
 
 	if err == nil {
@@ -20,7 +20,21 @@ func fileExists(filename string) bool {
 	return false
 }
 
-func getHistoryPath() (string, error) {
+type fileOption int
+
+const (
+	Historyy fileOption = iota
+	Config
+)
+
+func GetPath(option fileOption) (string, error) {
+	var filename string
+	if option == Historyy {
+		filename = "history.json"
+	} else {
+		filename = "config.yaml"
+	}
+
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
@@ -32,5 +46,5 @@ func getHistoryPath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(appDir, "history.json"), nil
+	return filepath.Join(appDir, filename), nil
 }

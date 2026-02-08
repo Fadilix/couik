@@ -1,11 +1,13 @@
 package ui
 
 import (
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fadilix/couik/cmd/couik/cli"
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/internal/game"
 	"github.com/fadilix/couik/pkg/typing"
@@ -77,6 +79,10 @@ type Model struct {
 
 	// words
 	InitialWords int
+
+	// User defaults
+	// config cli.Config
+	CustomDashboard string
 }
 
 func NewModel(target string) Model {
@@ -89,17 +95,56 @@ func NewModel(target string) Model {
 	p.Empty = '─'
 
 	targetRunes := []rune(target)
+	typingModes := []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}
+	qType := []string{"small", "mid", "thicc"}
+
+	defaultTMode := quoteMode
+	defaultQT := mid
+	defaultInitTime := 30
+	defaultDashboard := ""
+
+	// load the user config
+	config := cli.GetConfig()
+
+	if database.FileExists(config.DashboardASCII) {
+		dashboard, _ := cli.GetTextFromFile(config.DashboardASCII)
+		defaultDashboard = dashboard
+	}
+
+	if !slices.Contains(typingModes, config.Time) {
+		switch config.Time {
+		case "s":
+			defaultInitTime = 15
+		case "30s":
+			defaultInitTime = 30
+		case "60s":
+			defaultInitTime = 60
+		case "120s":
+			defaultInitTime = 120
+		}
+	}
+
+	switch config.Mode {
+	case "quote":
+		defaultTMode = quoteMode
+	case "words":
+		defaultTMode = wordMode
+	case "time":
+		defaultTMode = timedMode
+	}
 
 	return Model{
 		Target:           targetRunes,
 		Results:          make([]bool, len(targetRunes)),
 		ProgressBar:      p,
-		Choices:          []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
-		timeLeft:         30,
-		initialTime:      30,
-		Mode:             quoteMode, // Default to quote mode since we start with a random quote
-		QuoteType:        mid,       // default to mid
-		QuoteTypeChoices: []string{"small", "mid", "thicc"},
+		Choices:          typingModes,
+		timeLeft:         defaultInitTime,
+		initialTime:      defaultInitTime,
+		Mode:             defaultTMode, // Default to quote mode since we start with a random quote
+		QuoteType:        defaultQT,    // default to mid
+		InitialWords:     50,
+		QuoteTypeChoices: qType,
+		CustomDashboard:  defaultDashboard,
 	}
 }
 
