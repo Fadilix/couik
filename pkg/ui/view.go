@@ -93,18 +93,18 @@ func (m Model) View() string {
 		switch {
 		case i < m.Session.Index:
 			if m.Session.Results[i] {
-				textArea.WriteString(correctStyle.Render(s))
+				textArea.WriteString(CorrectStyle.Render(s))
 			} else {
 				if s == " " {
-					textArea.WriteString(spaceStyle.Render(s))
+					textArea.WriteString(SpaceStyle.Render(s))
 				} else {
-					textArea.WriteString(wrongStyle.Render(s))
+					textArea.WriteString(WrongStyle.Render(s))
 				}
 			}
 		case i == m.Session.Index:
-			textArea.WriteString(highlightStyle.Render(s))
+			textArea.WriteString(HighlightStyle.Render(s))
 		default:
-			textArea.WriteString(pendingStyle.Render(s))
+			textArea.WriteString(PendingStyle.Render(s))
 		}
 	}
 
@@ -120,8 +120,8 @@ func (m Model) View() string {
 		liveAcc, _ = stats.CalculateAccuracy(correctCount, m.Session.Index, m.Session.BackSpaceCount)
 	}
 
-	wpmDisplay := statsStyle.Render(fmt.Sprintf("WPM: %.2f", liveWpm))
-	accDisplay := statsStyle.Render(fmt.Sprintf("ACC: %.2f%%", liveAcc))
+	wpmDisplay := StatsStyle.Render(fmt.Sprintf("WPM: %.2f", liveWpm))
+	accDisplay := StatsStyle.Render(fmt.Sprintf("ACC: %.2f%%", liveAcc))
 	statsRow := lipgloss.JoinHorizontal(lipgloss.Top, wpmDisplay, accDisplay)
 
 	var percent float64
@@ -143,14 +143,14 @@ func (m Model) View() string {
 		for i, choice := range m.Choices {
 			var styledChoice string
 			if m.Cursor == i {
-				styledChoice = modeActiveStyle.Render(choice)
+				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
-				styledChoice = modeInactiveStyle.Render(choice)
+				styledChoice = ModeInactiveStyle.Render(choice)
 			}
 			modeButtons = append(modeButtons, styledChoice)
 		}
 		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, modeButtons...)
-		modeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+		modeSelectorString = ModeSelectorContainerStyle.Render(buttonRow)
 	}
 
 	if m.IsSelectingQuoteType {
@@ -158,14 +158,14 @@ func (m Model) View() string {
 		for i, choice := range m.QuoteTypeChoices {
 			var styledChoice string
 			if m.QuoteTypeCursor == i {
-				styledChoice = modeActiveStyle.Render(choice)
+				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
-				styledChoice = modeInactiveStyle.Render(choice)
+				styledChoice = ModeInactiveStyle.Render(choice)
 			}
 			quoteTypeButtons = append(quoteTypeButtons, styledChoice)
 		}
 		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, quoteTypeButtons...)
-		quoteTypeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+		quoteTypeSelectorString = ModeSelectorContainerStyle.Render(buttonRow)
 	}
 
 	timer := ""
@@ -195,7 +195,7 @@ func (m Model) View() string {
 %s
 %s
 %s`,
-		headerStyle.Render(renderedLogo),
+		HeaderStyle.Render(renderedLogo),
 		wrappedText,
 		statsRow,
 		bar,
@@ -217,14 +217,14 @@ func (m Model) resultsView() string {
 	}
 
 	// Logo Section
-	header := lipgloss.NewStyle().Foreground(catMauve).Bold(true).Render(renderedLogo)
+	header := lipgloss.NewStyle().Foreground(CatMauve).Bold(true).Render(renderedLogo)
 
 	// Stats Section - Using a box to make it stand out
-	statsTitleStyle := lipgloss.NewStyle().Foreground(catSapphire).Bold(true).MarginBottom(1)
+	statsTitleStyle := lipgloss.NewStyle().Foreground(CatSapphire).Bold(true).MarginBottom(1)
 
 	// Individual stat styling
-	labelStyle := lipgloss.NewStyle().Foreground(catSubtext).Width(15).Align(lipgloss.Left)
-	valueStyle := lipgloss.NewStyle().Foreground(catText).Bold(true)
+	labelStyle := lipgloss.NewStyle().Foreground(CatSubtext).Width(15).Align(lipgloss.Left)
+	valueStyle := lipgloss.NewStyle().Foreground(CatText).Bold(true)
 
 	// Build the stats block
 	statsBox := lipgloss.JoinVertical(lipgloss.Left,
@@ -237,12 +237,12 @@ func (m Model) resultsView() string {
 	// Wrap stats in a subtle border or padding
 	styledStats := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(catSurface).
+		BorderForeground(CatSurface).
 		Padding(1, 3).
 		Render(statsBox)
 
 	// Footer Section
-	helpStyle := lipgloss.NewStyle().Foreground(catOverlay).MarginTop(1)
+	helpStyle := lipgloss.NewStyle().Foreground(CatOverlay).MarginTop(1)
 	footer := helpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
 
 	modeSelectorString := ""
@@ -253,14 +253,14 @@ func (m Model) resultsView() string {
 		for i, choice := range m.Choices {
 			var styledChoice string
 			if m.Cursor == i {
-				styledChoice = modeActiveStyle.Render(choice)
+				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
-				styledChoice = modeInactiveStyle.Render(choice)
+				styledChoice = ModeInactiveStyle.Render(choice)
 			}
 			modeButtons = append(modeButtons, styledChoice)
 		}
 		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, modeButtons...)
-		modeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+		modeSelectorString = ModeSelectorContainerStyle.Render(buttonRow)
 	}
 
 	if m.IsSelectingQuoteType {
@@ -268,14 +268,14 @@ func (m Model) resultsView() string {
 		for i, choice := range m.QuoteTypeChoices {
 			var styledChoice string
 			if m.QuoteTypeCursor == i {
-				styledChoice = modeActiveStyle.Render(choice)
+				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
-				styledChoice = modeInactiveStyle.Render(choice)
+				styledChoice = ModeInactiveStyle.Render(choice)
 			}
 			quoteTypeButtons = append(quoteTypeButtons, styledChoice)
 		}
 		buttonRow := lipgloss.JoinHorizontal(lipgloss.Center, quoteTypeButtons...)
-		quoteTypeSelectorString = modeSelectorContainerStyle.Render(buttonRow)
+		quoteTypeSelectorString = ModeSelectorContainerStyle.Render(buttonRow)
 	}
 
 	// Final Assembly
