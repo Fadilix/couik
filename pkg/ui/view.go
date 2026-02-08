@@ -98,8 +98,8 @@ func (m Model) View() string {
 		lineStarts = append(lineStarts, curr)
 
 		limit := curr + textWidth
-		if limit >= len(m.Target) {
-			if cursorLine == -1 && m.Index >= curr {
+		if limit >= len(m.Session.Target) {
+			if cursorLine == -1 && m.Session.Index >= curr {
 				cursorLine = len(lineStarts) - 1
 			}
 			break
@@ -108,7 +108,7 @@ func (m Model) View() string {
 		split := limit
 		foundSpace := false
 		for i := limit; i > curr; i-- {
-			if m.Target[i] == ' ' {
+			if m.Session.Target[i] == ' ' {
 				split = i + 1
 				foundSpace = true
 				break
@@ -120,13 +120,13 @@ func (m Model) View() string {
 		}
 
 		if cursorLine == -1 {
-			if m.Index >= curr && m.Index < split {
+			if m.Session.Index >= curr && m.Session.Index < split {
 				cursorLine = len(lineStarts) - 1
 			}
 		}
 
 		curr = split
-		if curr >= len(m.Target) {
+		if curr >= len(m.Session.Target) {
 			break
 		}
 
@@ -143,7 +143,7 @@ func (m Model) View() string {
 	startLineIdx := cursorLine
 	startIdx := lineStarts[startLineIdx]
 
-	endIdx := len(m.Target)
+	endIdx := len(m.Session.Target)
 
 	lookaheadLines := 3
 	targetLineEndpoint := startLineIdx + lookaheadLines
@@ -155,10 +155,10 @@ func (m Model) View() string {
 	windowEnd := endIdx
 	var textArea strings.Builder
 	for i := windowStart; i < windowEnd; i++ {
-		s := string(m.Target[i])
+		s := string(m.Session.Target[i])
 		switch {
-		case i < m.Index:
-			if m.Results[i] {
+		case i < m.Session.Index:
+			if m.Session.Results[i] {
 				textArea.WriteString(correctStyle.Render(s))
 			} else {
 				if s == " " {
@@ -167,7 +167,7 @@ func (m Model) View() string {
 					textArea.WriteString(wrongStyle.Render(s))
 				}
 			}
-		case i == m.Index:
+		case i == m.Session.Index:
 			textArea.WriteString(highlightStyle.Render(s))
 		default:
 			textArea.WriteString(pendingStyle.Render(s))
@@ -175,15 +175,15 @@ func (m Model) View() string {
 	}
 
 	var liveWpm, liveAcc float64
-	if m.Started && m.Index > 0 {
+	if m.Session.Started && m.Session.Index > 0 {
 		correctCount := 0
-		for _, r := range m.Results[:m.Index] {
+		for _, r := range m.Session.Results[:m.Session.Index] {
 			if r {
 				correctCount++
 			}
 		}
-		liveWpm = stats.CalculateTypingSpeed(correctCount, time.Since(m.StartTime))
-		liveAcc, _ = stats.CalculateAccuracy(correctCount, m.Index, m.BackSpaceCount)
+		liveWpm = stats.CalculateTypingSpeed(correctCount, time.Since(m.Session.StartTime))
+		liveAcc, _ = stats.CalculateAccuracy(correctCount, m.Session.Index, m.Session.BackSpaceCount)
 	}
 
 	wpmDisplay := statsStyle.Render(fmt.Sprintf("WPM: %.2f", liveWpm))
@@ -194,7 +194,7 @@ func (m Model) View() string {
 	if m.Mode == timedMode && m.initialTime > 0 {
 		percent = float64(m.initialTime-m.timeLeft) / float64(m.initialTime)
 	} else {
-		percent = float64(m.Index) / float64(len(m.Target))
+		percent = float64(m.Session.Index) / float64(len(m.Session.Target))
 	}
 	bar := m.ProgressBar.ViewAs(percent)
 
@@ -295,9 +295,9 @@ func (m Model) resultsView() string {
 	// Build the stats block
 	statsBox := lipgloss.JoinVertical(lipgloss.Left,
 		statsTitleStyle.Render("SESSION PERFORMANCE"),
-		fmt.Sprintf("%s %s", labelStyle.Render("Speed:"), valueStyle.Render(fmt.Sprintf("%.2f WPM", m.CalculateTypingSpeed()))),
-		fmt.Sprintf("%s %s", labelStyle.Render("Raw Speed:"), valueStyle.Render(fmt.Sprintf("%.2f WPM", m.CalculateRawTypingSpeed()))),
-		fmt.Sprintf("%s %s", labelStyle.Render("Accuracy:"), valueStyle.Render(fmt.Sprintf("%.2f%%", m.CalculateAccuracy()))),
+		fmt.Sprintf("%s %s", labelStyle.Render("Speed:"), valueStyle.Render(fmt.Sprintf("%.2f WPM", m.Session.CalculateTypingSpeed()))),
+		fmt.Sprintf("%s %s", labelStyle.Render("Raw Speed:"), valueStyle.Render(fmt.Sprintf("%.2f WPM", m.Session.CalculateRawTypingSpeed()))),
+		fmt.Sprintf("%s %s", labelStyle.Render("Accuracy:"), valueStyle.Render(fmt.Sprintf("%.2f%%", m.Session.CalculateAccuracy()))),
 	)
 
 	// Wrap stats in a subtle border or padding

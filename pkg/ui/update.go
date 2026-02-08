@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,7 +16,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.timeLeft <= 0 {
 				m.Active = false
 				m.State = stateResults
-				m.EndTime = time.Now()
+				m.Session.EndTime = time.Now()
 				return m, nil
 			}
 			return m, tick()
@@ -98,12 +97,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.IsSelectingQuoteType = !m.IsSelectingQuoteType
 
 		case tea.KeyBackspace:
-			if m.Index > 0 {
-				m.Index--
-				if m.IsError {
-					m.BackSpaceCount++
-				}
-			}
+			m.Session.BackSpace()
 		case tea.KeyShiftTab:
 			m.IsSelectingMode = !m.IsSelectingMode
 
@@ -121,9 +115,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlL:
 			if m.State == stateResults {
 				if m.Mode != timedMode {
-					return m.GetModelWithCustomTarget(string(m.Target)), nil
+					return m.GetModelWithCustomTarget(string(m.Session.Target)), nil
 				}
-				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Target)), nil
+				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Session.Target)), nil
 			}
 		case tea.KeyCtrlR:
 			switch m.Mode {
@@ -160,40 +154,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				startTimer = true
 			}
 
-			if !m.Started {
-				m.StartTime = time.Now()
-				m.Started = true
+			if m.Session.Index < len(m.Session.Target) {
+				m.Session.Type(msg.String())
 			}
 
-			if m.Index < len(m.Target) {
-				typedChar := msg.String()
-				if msg.Type == tea.KeySpace {
-					typedChar = " "
-				}
-
-				isCorrect := typedChar == string(m.Target[m.Index])
-				m.IsError = !isCorrect
-
-				m.Results[m.Index] = typedChar == string(m.Target[m.Index])
-				m.Index++
-			}
-
-			if m.Index >= len(m.Target) {
+			if m.Session.IsFinished() {
 				m.State = stateResults
-				m.EndTime = time.Now()
-				// save to database
 				result := database.TestResult{
-					RawWPM:   m.CalculateRawTypingSpeed(),
-					WPM:      m.CalculateTypingSpeed(),
-					Acc:      m.CalculateAccuracy(),
-					Duration: m.EndTime.Sub(m.StartTime),
-					Quote:    string(m.Target),
+					RawWPM:   m.Session.CalculateRawTypingSpeed(),
+					WPM:      m.Session.CalculateTypingSpeed(),
+					Acc:      m.Session.CalculateAccuracy(),
+					Duration: m.Session.EndTime.Sub(m.Session.StartTime),
+					Quote:    string(m.Session.Target),
 					Date:     time.Now(),
 				}
-				err := database.Save(result)
-				if err != nil {
-					fmt.Printf("an error occured while trying to save to db : %s\n", err)
-				}
+				m.Repo.Save(result)
 			}
 
 			// Start the timer if needed
