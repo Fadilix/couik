@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"slices"
-	"strconv"
 
 	"github.com/fadilix/couik/database"
 	"gopkg.in/yaml.v3"
@@ -44,7 +43,7 @@ func SetConfig(key, value string) {
 
 	switch key {
 	case "mode":
-		if !slices.Contains([]string{"quote", "time", "word"}, value) {
+		if !slices.Contains([]string{"quote", "time", "words"}, value) {
 			log.Fatal("Can't use this value")
 		}
 		config.Mode = value
@@ -53,7 +52,7 @@ func SetConfig(key, value string) {
 		if !database.FileExists(value) {
 			log.Fatal("The path is incorrect")
 		}
-		config.DashboardAscii = value
+		config.DashboardASCII = value
 	case "quote_type":
 		if !slices.Contains([]string{"small", "mid", "thicc"}, value) {
 			log.Fatal("Can't use this value as quote_type")
@@ -61,12 +60,11 @@ func SetConfig(key, value string) {
 		config.QuoteType = value
 
 	case "time":
-		if _, err := strconv.Atoi(value); err != nil {
-			log.Fatal("You have to use an integer as preferred time")
+		if !slices.Contains([]string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}, value) {
+			log.Fatal("You can't use that value as preffered time")
 		}
 
-		val, _ := strconv.Atoi(value)
-		config.Time = val
+		config.Time = value
 	}
 
 	path, err := database.GetPath(database.Config)
