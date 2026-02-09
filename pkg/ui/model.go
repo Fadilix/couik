@@ -56,9 +56,9 @@ type Model struct {
 
 	// for mode selecting
 	IsSelectingMode bool
-	Cursor          int
-	Choices         []string
-	Mode            TypingMode
+	// Cursor          int
+	// Choices         []string
+	Mode TypingMode
 
 	// state
 	State sessionState
@@ -69,9 +69,9 @@ type Model struct {
 	Active      bool
 
 	// quote mode selection
-	QuoteType            quoteType
-	QuoteTypeCursor      int
-	QuoteTypeChoices     []string
+	QuoteType quoteType
+	// QuoteTypeCursor      int
+	// QuoteTypeChoices     []string
 	IsSelectingQuoteType bool
 
 	// words
@@ -92,7 +92,7 @@ func NewModel(target string) Model {
 	p.Empty = '─'
 
 	typingModes := []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}
-	qType := []string{"small", "mid", "thicc"}
+	// qType := []string{"small", "mid", "thicc"}
 
 	defaultTMode := quoteMode
 	defaultQT := mid
@@ -130,18 +130,18 @@ func NewModel(target string) Model {
 	}
 
 	return Model{
-		Session:          engine.NewSession(target),
-		ProgressBar:      p,
-		Choices:          typingModes,
-		timeLeft:         defaultInitTime,
-		initialTime:      defaultInitTime,
-		Mode:             defaultTMode, // Default to quote mode since we start with a random quote
-		QuoteType:        defaultQT,    // default to mid
-		InitialWords:     50,
-		QuoteTypeChoices: qType,
-		CustomDashboard:  defaultDashboard,
-		Repo:             &storage.JSONRepository{},
-		CurrentSelector:  components.NewModeSelector(),
+		Session:     engine.NewSession(target),
+		ProgressBar: p,
+		// Choices:          typingModes,
+		timeLeft:     defaultInitTime,
+		initialTime:  defaultInitTime,
+		Mode:         defaultTMode, // Default to quote mode since we start with a random quote
+		QuoteType:    defaultQT,    // default to mid
+		InitialWords: 50,
+		// QuoteTypeChoices: qType,
+		CustomDashboard: defaultDashboard,
+		Repo:            &storage.JSONRepository{},
+		CurrentSelector: components.NewModeSelector(),
 	}
 }
 

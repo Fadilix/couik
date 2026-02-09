@@ -140,9 +140,9 @@ func (m Model) View() string {
 
 	if m.IsSelectingMode {
 		var modeButtons []string
-		for i, choice := range m.Choices {
+		for i, choice := range m.CurrentSelector.GetChoices() {
 			var styledChoice string
-			if m.Cursor == i {
+			if m.CurrentSelector.GetCursor() == i {
 				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
 				styledChoice = ModeInactiveStyle.Render(choice)
@@ -155,9 +155,9 @@ func (m Model) View() string {
 
 	if m.IsSelectingQuoteType {
 		var quoteTypeButtons []string
-		for i, choice := range m.QuoteTypeChoices {
+		for i, choice := range m.CurrentSelector.GetChoices() {
 			var styledChoice string
-			if m.QuoteTypeCursor == i {
+			if m.CurrentSelector.GetCursor() == i {
 				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
 				styledChoice = ModeInactiveStyle.Render(choice)
@@ -250,9 +250,9 @@ func (m Model) resultsView() string {
 
 	if m.IsSelectingMode {
 		var modeButtons []string
-		for i, choice := range m.Choices {
+		for i, choice := range m.CurrentSelector.GetChoices() {
 			var styledChoice string
-			if m.Cursor == i {
+			if m.CurrentSelector.GetCursor() == i {
 				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
 				styledChoice = ModeInactiveStyle.Render(choice)
@@ -265,9 +265,9 @@ func (m Model) resultsView() string {
 
 	if m.IsSelectingQuoteType {
 		var quoteTypeButtons []string
-		for i, choice := range m.QuoteTypeChoices {
+		for i, choice := range m.CurrentSelector.GetChoices() {
 			var styledChoice string
-			if m.QuoteTypeCursor == i {
+			if m.CurrentSelector.GetCursor() == i {
 				styledChoice = ModeActiveStyle.Render(choice)
 			} else {
 				styledChoice = ModeInactiveStyle.Render(choice)
