@@ -169,8 +169,11 @@ func (m Model) View() string {
 	}
 
 	timer := ""
+	words := ""
 	if m.Mode == timedMode {
 		timer = fmt.Sprintf("%d\n", m.timeLeft)
+	} else {
+		words = fmt.Sprintf("%d/%d\n", m.Session.Index, len(string(m.Session.Target)))
 	}
 
 	renderedLogo := dashboardLogo
@@ -189,6 +192,7 @@ func (m Model) View() string {
 		lipgloss.NewStyle().Faint(true).Render("Press Esc to quit • [SHIFT + TAB] change mode"),
 		"\n",
 		timer,
+		words,
 		modeSelectorString,
 		quoteTypeSelectorString,
 	)

@@ -9,10 +9,9 @@
 [![AUR version](https://img.shields.io/aur/version/couik-bin)](https://aur.archlinux.org/packages/couik-bin)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fadilix/couik)](https://github.com/fadilix/couik/releases)
 
-####
+
 <img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/683b8898-9d75-48ee-888f-e808a3c738ef" />
 
-####
 
 </div>
 
@@ -96,11 +95,58 @@ couik [flags]
 | `--history`| `-i`| View your past results | `couik -i` |
 | `--help` | `-h` | Show help message | `couik -h` |
 
-## Controls
+
+### Controls
 
 - **Start Typing**: The test begins immediately.
 - `ESC` / `Ctrl+C`: Quit the application.
-- `Tab`: Restart the test (if supported by current mode).
+- `Tab`: Restart the test.
+- `Ctrl+L`: Restart the test with the same text.
+- `Shift+Tab`: Change game mode.
+
+## Configuration
+
+You can customize `couik` using the `config` subcommand.
+
+```bash
+couik config set [key] [value]
+```
+
+### Available Settings
+
+| Key | Valid Values | Description | Example |
+| :--- | :--- | :--- | :--- |
+| `mode` | `quote`, `time`, `words` | Sets the default game mode. | `couik config set mode quote` |
+| `time` | `15s`, `30s`, `60s`, `120s`| Sets the test duration or word count limit. | `couik config set time 30s` |
+| `quote_type` | `small`, `mid`, `thicc` | Adjusts the length/volume of the quotes. | `couik config set quote_type mid` |
+| `dashboard_ascii` | path to `.txt` file | Sets a custom ASCII art for the dashboard. | `couik config set dashboard_ascii ~/art.txt` |
+
+
+### Custom Dashboard Art
+
+You can personalize the dashboard by adding your own ASCII art. Simply create a text file with your art and point `couik` to it.
+
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/d0b9898c-08a9-4f4c-a6a6-06f25d1c1764" />
+
+To set a custom ASCII logo, use the following command:
+
+```bash
+couik config set dashboard_ascii /path/to/your/ascii.txt
+```
+
+Alternatively, you can manually edit the configuration file (typically located at `/home/username/.config/couik/config.yaml` on Linux):
+
+```yaml
+mode: ""
+dashboard_ascii: /home/username/.config/couik/logo.txt
+quote_type: ""
+time: ""
+```
+
+### Subcommands
+
+- `config`: Configure your preferences.
+- `completion`: Generate autocompletion scripts.
 
 
 ## Contributing
