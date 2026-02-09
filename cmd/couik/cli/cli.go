@@ -1,10 +1,13 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 var RootCmd = &cobra.Command{
 	Use:   "couik",
 	Short: "Your typing experience brought to the terminal",
+	Run:   func(cmd *cobra.Command, args []string) {},
 }
 
 var (
@@ -14,9 +17,15 @@ var (
 	Words   int
 	File    string
 	Text    string
+	SetHelp bool
 )
 
 func Init() {
+	SetCommand.Flags().BoolVarP(&SetHelp, "help", "h", false, "Show help for the <set> subcommand")
+
+	ConfigCommand.AddCommand(SetCommand)
+	RootCmd.AddCommand(ConfigCommand)
+
 	RootCmd.Flags().BoolVarP(&History, "history", "i", false, "Show history")
 	RootCmd.Flags().BoolVarP(&Help, "help", "h", false, "Show help")
 	RootCmd.Flags().IntVarP(&Time, "time", "t", 0, "Launch timed typing test (seconds: 30, 60, 120)")

@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+
+	"github.com/fadilix/couik/database"
 )
 
 var quotes = []string{
@@ -78,6 +80,15 @@ func GetDictionnary() string {
 	return strings.Join(dictionnary, " ")
 }
 
+// GetQuoteUseCase fetches quotes from database
+// and returns the list according to the language and category
+func GetQuoteUseCase(lang database.Language, category database.Category) database.Quote {
+	quotes := database.GetQuotes(lang, category)
+	return quotes[rand.Intn(len(quotes))]
+}
+
+// GetQuoteFromFile a reads a file and returns the text
+// inside of it
 func GetQuoteFromFile(filepath string) (string, error) {
 	quote, err := os.ReadFile(filepath)
 	if err != nil {
