@@ -11,7 +11,7 @@ var ConfigCommand = &cobra.Command{
 	Use:   "config",
 	Short: "Configure your Couik preferences",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("config")
+		fmt.Println(cmd.Usage())
 		os.Exit(0)
 	},
 }
@@ -21,7 +21,7 @@ var SetCommand = &cobra.Command{
 	Short: "Set config preferences",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 2 {
-			print(cmd.Usage())
+			fmt.Println(cmd.Usage())
 			os.Exit(0)
 		}
 		key, value := args[0], args[1]
