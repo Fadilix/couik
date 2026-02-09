@@ -75,7 +75,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m.GetDictionnaryModelWithWords(25), nil
 				}
 			} else if m.IsSelectingQuoteType {
-				selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
+				// selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
+				selected := m.CurrentSelector.Selected()
 
 				switch selected {
 				case "small":
@@ -99,12 +100,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlE:
 			m.CurrentSelector = components.NewQuoteTypeSelector()
 			m.IsSelectingQuoteType = !m.IsSelectingQuoteType
+			m.IsSelectingMode = false
 
 		case tea.KeyBackspace:
 			m.Session.BackSpace()
 		case tea.KeyShiftTab:
 			m.CurrentSelector = components.NewModeSelector()
 			m.IsSelectingMode = !m.IsSelectingMode
+			m.IsSelectingQuoteType = false
 
 		case tea.KeyTab:
 			if m.State == stateResults {

@@ -27,3 +27,11 @@ func (ms *ModeSelector) Decrement() {
 func (ms ModeSelector) Selected() string {
 	return ms.Choices[ms.Cursor]
 }
+
+func (ms ModeSelector) GetChoices() []string {
+	return ms.Choices
+}
+
+func (ms ModeSelector) GetCursor() int {
+	return ms.Cursor
+}

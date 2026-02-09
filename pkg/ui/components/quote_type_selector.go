@@ -15,18 +15,26 @@ func NewQuoteTypeSelector() *QuoteTypeSelector {
 	return selector
 }
 
-func (ms *QuoteTypeSelector) Increment() {
-	if ms.Cursor < len(ms.Choices)-1 {
-		ms.Cursor++
+func (qts *QuoteTypeSelector) Increment() {
+	if qts.Cursor < len(qts.Choices)-1 {
+		qts.Cursor++
 	}
 }
 
-func (ms *QuoteTypeSelector) Decrement() {
-	if ms.Cursor > 0 {
-		ms.Cursor--
+func (qts *QuoteTypeSelector) Decrement() {
+	if qts.Cursor > 0 {
+		qts.Cursor--
 	}
 }
 
-func (ms QuoteTypeSelector) Selected() string {
-	return ms.Choices[ms.Cursor]
+func (qts QuoteTypeSelector) Selected() string {
+	return qts.Choices[qts.Cursor]
+}
+
+func (qts QuoteTypeSelector) GetChoices() []string {
+	return qts.Choices
+}
+
+func (qts QuoteTypeSelector) GetCursor() int {
+	return qts.Cursor
 }
