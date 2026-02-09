@@ -14,7 +14,7 @@ import (
 	"github.com/fadilix/couik/pkg/typing"
 )
 
-type tickMsg time.Time
+type TickMsg time.Time
 
 type sessionState int
 
@@ -316,8 +316,8 @@ func (m Model) GetModelWithQuoteType(option string) Model {
 	return newModel
 }
 
-func tick() tea.Cmd {
+func Tick() tea.Cmd {
 	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
-		return tickMsg(t)
+		return TickMsg(t)
 	})
 }
