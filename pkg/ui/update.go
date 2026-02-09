@@ -9,7 +9,7 @@ import (
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tickMsg:
+	case TickMsg:
 		if m.Mode == timedMode {
 			m.timeLeft--
 			// Check if time is up AFTER decrementing to avoid delay at the end
@@ -19,7 +19,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Session.EndTime = time.Now()
 				return m, nil
 			}
-			return m, tick()
+			return m, Tick()
 		}
 
 	case tea.WindowSizeMsg:
@@ -54,23 +54,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "enter":
 			if m.IsSelectingMode {
-				selected := m.Choices[m.Cursor]
-				switch selected {
-				case "15s":
-					return m.GetDictionnaryModel(15), nil
-				case "30s":
-					return m.GetDictionnaryModel(30), nil
-				case "60s":
-					return m.GetDictionnaryModel(60), nil
-				case "120s":
-					return m.GetDictionnaryModel(120), nil
-				case "quote":
-					return m.GetQuoteModel(), nil
-				case "words 10":
-					return m.GetDictionnaryModelWithWords(10), nil
-				case "words 25":
-					return m.GetDictionnaryModelWithWords(25), nil
-				}
+				// selected := m.Choices[m.Cursor]
+				// switch selected {
+				// case "15s":
+				// 	return m.GetDictionnaryModel(15), nil
+				// case "30s":
+				// 	return m.GetDictionnaryModel(30), nil
+				// case "60s":
+				// 	return m.GetDictionnaryModel(60), nil
+				// case "120s":
+				// 	return m.GetDictionnaryModel(120), nil
+				// case "quote":
+				// 	return m.GetQuoteModel(), nil
+				// case "words 10":
+				// 	return m.GetDictionnaryModelWithWords(10), nil
+				// case "words 25":
+				// 	return m.GetDictionnaryModelWithWords(25), nil
+				// }
 			} else if m.IsSelectingQuoteType {
 				selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
 
@@ -173,7 +173,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Start the timer if needed
 			if startTimer {
-				return m, tick()
+				return m, Tick()
 			}
 		}
 	}
