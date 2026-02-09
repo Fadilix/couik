@@ -34,26 +34,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "l", "right":
 			m.CurrentSelector.Increment()
-			// if m.IsSelectingMode {
-			// 	if m.Cursor < len(m.Choices)-1 {
-			// 		m.Cursor++
-			// 	}
-			// } else if m.IsSelectingQuoteType {
-			// 	if m.QuoteTypeCursor < len(m.QuoteTypeChoices)-1 {
-			// 		m.QuoteTypeCursor++
-			// 	}
-			// }
 		case "h", "left":
 			m.CurrentSelector.Decrement()
-			// if m.IsSelectingMode {
-			// 	if m.Cursor > 0 {
-			// 		m.Cursor--
-			// 	}
-			// } else if m.IsSelectingQuoteType {
-			// 	if m.QuoteTypeCursor > 0 {
-			// 		m.QuoteTypeCursor--
-			// 	}
-			// }
 
 		case "enter":
 			if m.IsSelectingMode {
@@ -103,7 +85,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.IsSelectingMode = false
 
 		case tea.KeyBackspace:
-			m.Session.BackSpace()
+			if m.State != stateResults {
+				m.Session.BackSpace()
+			}
 		case tea.KeyShiftTab:
 			m.CurrentSelector = components.NewModeSelector()
 			m.IsSelectingMode = !m.IsSelectingMode
