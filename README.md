@@ -27,7 +27,6 @@ Whether you want to warm up before coding, challenge your friends, or just track
 
 - **Timed Mode**: Test yourself against the clock (`15s`, `30s`, `60s`, `120s`).
 - **Word Mode**: Practice with a set number of words (`10`, `25`, `50`, `100`).
-- **Quote Mode**: Practice with random quotes (default mode).
 - **Custom Text**: Load your own text files or paste custom strings.
 - **History Tracking**: Keep track of your progress over time with built-in stats.
 - **Beautiful UI**: Modern, clean interface with real-time feedback.
