@@ -1,26 +1,26 @@
 package ui
 
 import (
-	"fmt"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
+	"github.com/fadilix/couik/pkg/ui/components"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tickMsg:
+	case TickMsg:
 		if m.Mode == timedMode {
 			m.timeLeft--
 			// Check if time is up AFTER decrementing to avoid delay at the end
 			if m.timeLeft <= 0 {
 				m.Active = false
 				m.State = stateResults
-				m.EndTime = time.Now()
+				m.Session.EndTime = time.Now()
 				return m, nil
 			}
-			return m, tick()
+			return m, Tick()
 		}
 
 	case tea.WindowSizeMsg:
@@ -33,29 +33,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "l", "right":
-			if m.IsSelectingMode {
-				if m.Cursor < len(m.Choices)-1 {
-					m.Cursor++
-				}
-			} else if m.IsSelectingQuoteType {
-				if m.QuoteTypeCursor < len(m.QuoteTypeChoices)-1 {
-					m.QuoteTypeCursor++
-				}
-			}
+			m.CurrentSelector.Increment()
 		case "h", "left":
-			if m.IsSelectingMode {
-				if m.Cursor > 0 {
-					m.Cursor--
-				}
-			} else if m.IsSelectingQuoteType {
-				if m.QuoteTypeCursor > 0 {
-					m.QuoteTypeCursor--
-				}
-			}
+			m.CurrentSelector.Decrement()
 
 		case "enter":
 			if m.IsSelectingMode {
-				selected := m.Choices[m.Cursor]
+				selected := m.CurrentSelector.Selected()
 				switch selected {
 				case "15s":
 					return m.GetDictionnaryModel(15), nil
@@ -73,7 +57,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m.GetDictionnaryModelWithWords(25), nil
 				}
 			} else if m.IsSelectingQuoteType {
-				selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
+				// selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
+				selected := m.CurrentSelector.Selected()
 
 				switch selected {
 				case "small":
@@ -95,17 +80,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case tea.KeyCtrlE:
+			m.CurrentSelector = components.NewQuoteTypeSelector()
 			m.IsSelectingQuoteType = !m.IsSelectingQuoteType
+			m.IsSelectingMode = false
 
 		case tea.KeyBackspace:
-			if m.Index > 0 {
-				m.Index--
-				if m.IsError {
-					m.BackSpaceCount++
-				}
+			if m.State != stateResults {
+				m.Session.BackSpace()
 			}
 		case tea.KeyShiftTab:
+			m.CurrentSelector = components.NewModeSelector()
 			m.IsSelectingMode = !m.IsSelectingMode
+			m.IsSelectingQuoteType = false
 
 		case tea.KeyTab:
 			if m.State == stateResults {
@@ -121,9 +107,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlL:
 			if m.State == stateResults {
 				if m.Mode != timedMode {
-					return m.GetModelWithCustomTarget(string(m.Target)), nil
+					return m.GetModelWithCustomTarget(string(m.Session.Target)), nil
 				}
-				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Target)), nil
+				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Session.Target)), nil
 			}
 		case tea.KeyCtrlR:
 			switch m.Mode {
@@ -160,45 +146,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				startTimer = true
 			}
 
-			if !m.Started {
-				m.StartTime = time.Now()
-				m.Started = true
+			if m.Session.Index < len(m.Session.Target) {
+				m.Session.Type(msg.String())
 			}
 
-			if m.Index < len(m.Target) {
-				typedChar := msg.String()
-				if msg.Type == tea.KeySpace {
-					typedChar = " "
-				}
-
-				isCorrect := typedChar == string(m.Target[m.Index])
-				m.IsError = !isCorrect
-
-				m.Results[m.Index] = typedChar == string(m.Target[m.Index])
-				m.Index++
-			}
-
-			if m.Index >= len(m.Target) {
+			if m.Session.IsFinished() {
 				m.State = stateResults
-				m.EndTime = time.Now()
-				// save to database
 				result := database.TestResult{
-					RawWPM:   m.CalculateRawTypingSpeed(),
-					WPM:      m.CalculateTypingSpeed(),
-					Acc:      m.CalculateAccuracy(),
-					Duration: m.EndTime.Sub(m.StartTime),
-					Quote:    string(m.Target),
+					RawWPM:   m.Session.CalculateRawTypingSpeed(),
+					WPM:      m.Session.CalculateTypingSpeed(),
+					Acc:      m.Session.CalculateAccuracy(),
+					Duration: m.Session.EndTime.Sub(m.Session.StartTime),
+					Quote:    string(m.Session.Target),
 					Date:     time.Now(),
 				}
-				err := database.Save(result)
-				if err != nil {
-					fmt.Printf("an error occured while trying to save to db : %s\n", err)
-				}
+				m.Repo.Save(result)
 			}
 
 			// Start the timer if needed
 			if startTimer {
-				return m, tick()
+				return m, Tick()
 			}
 		}
 	}
