@@ -5,6 +5,13 @@ type ModeSelector struct {
 	Choices []string
 }
 
+func NewModeSelector() *ModeSelector {
+	return &ModeSelector{
+		Cursor:  0,
+		Choices: []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
+	}
+}
+
 func (ms *ModeSelector) Increment() {
 	if ms.Cursor < len(ms.Choices)-1 {
 		ms.Cursor++

@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
+	"github.com/fadilix/couik/pkg/ui/components"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -32,45 +33,47 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "l", "right":
-			if m.IsSelectingMode {
-				if m.Cursor < len(m.Choices)-1 {
-					m.Cursor++
-				}
-			} else if m.IsSelectingQuoteType {
-				if m.QuoteTypeCursor < len(m.QuoteTypeChoices)-1 {
-					m.QuoteTypeCursor++
-				}
-			}
+			m.CurrentSelector.Increment()
+			// if m.IsSelectingMode {
+			// 	if m.Cursor < len(m.Choices)-1 {
+			// 		m.Cursor++
+			// 	}
+			// } else if m.IsSelectingQuoteType {
+			// 	if m.QuoteTypeCursor < len(m.QuoteTypeChoices)-1 {
+			// 		m.QuoteTypeCursor++
+			// 	}
+			// }
 		case "h", "left":
-			if m.IsSelectingMode {
-				if m.Cursor > 0 {
-					m.Cursor--
-				}
-			} else if m.IsSelectingQuoteType {
-				if m.QuoteTypeCursor > 0 {
-					m.QuoteTypeCursor--
-				}
-			}
+			m.CurrentSelector.Decrement()
+			// if m.IsSelectingMode {
+			// 	if m.Cursor > 0 {
+			// 		m.Cursor--
+			// 	}
+			// } else if m.IsSelectingQuoteType {
+			// 	if m.QuoteTypeCursor > 0 {
+			// 		m.QuoteTypeCursor--
+			// 	}
+			// }
 
 		case "enter":
 			if m.IsSelectingMode {
-				// selected := m.Choices[m.Cursor]
-				// switch selected {
-				// case "15s":
-				// 	return m.GetDictionnaryModel(15), nil
-				// case "30s":
-				// 	return m.GetDictionnaryModel(30), nil
-				// case "60s":
-				// 	return m.GetDictionnaryModel(60), nil
-				// case "120s":
-				// 	return m.GetDictionnaryModel(120), nil
-				// case "quote":
-				// 	return m.GetQuoteModel(), nil
-				// case "words 10":
-				// 	return m.GetDictionnaryModelWithWords(10), nil
-				// case "words 25":
-				// 	return m.GetDictionnaryModelWithWords(25), nil
-				// }
+				selected := m.CurrentSelector.Selected()
+				switch selected {
+				case "15s":
+					return m.GetDictionnaryModel(15), nil
+				case "30s":
+					return m.GetDictionnaryModel(30), nil
+				case "60s":
+					return m.GetDictionnaryModel(60), nil
+				case "120s":
+					return m.GetDictionnaryModel(120), nil
+				case "quote":
+					return m.GetQuoteModel(), nil
+				case "words 10":
+					return m.GetDictionnaryModelWithWords(10), nil
+				case "words 25":
+					return m.GetDictionnaryModelWithWords(25), nil
+				}
 			} else if m.IsSelectingQuoteType {
 				selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
 
@@ -94,11 +97,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case tea.KeyCtrlE:
+			m.CurrentSelector = components.NewQuoteTypeSelector()
 			m.IsSelectingQuoteType = !m.IsSelectingQuoteType
 
 		case tea.KeyBackspace:
 			m.Session.BackSpace()
 		case tea.KeyShiftTab:
+			m.CurrentSelector = components.NewModeSelector()
 			m.IsSelectingMode = !m.IsSelectingMode
 
 		case tea.KeyTab:

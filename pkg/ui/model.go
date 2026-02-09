@@ -12,6 +12,7 @@ import (
 	"github.com/fadilix/couik/internal/engine"
 	"github.com/fadilix/couik/internal/storage"
 	"github.com/fadilix/couik/pkg/typing"
+	"github.com/fadilix/couik/pkg/ui/components"
 )
 
 type TickMsg time.Time
@@ -49,6 +50,9 @@ type Model struct {
 	ProgressBar    progress.Model
 	TerminalWidth  int
 	TerminalHeight int
+
+	// mode selecting
+	CurrentSelector components.Selector
 
 	// for mode selecting
 	IsSelectingMode bool
@@ -137,76 +141,13 @@ func NewModel(target string) Model {
 		QuoteTypeChoices: qType,
 		CustomDashboard:  defaultDashboard,
 		Repo:             &storage.JSONRepository{},
+		CurrentSelector:  components.NewModeSelector(),
 	}
 }
 
 func (m Model) Init() tea.Cmd {
 	return nil
 }
-
-// func (m Model) CalculateTypingSpeed() float64 {
-// 	// Guard: return 0 if not in results state to avoid division by zero
-// 	if m.State != stateResults {
-// 		return 0
-// 	}
-//
-// 	var duration time.Duration
-// 	var correctChars int
-//
-// 	if m.Mode == timedMode {
-// 		duration = time.Duration(m.initialTime) * time.Second
-// 		correctChars = game.CountCorrect(m.Results[:m.Index])
-// 	} else {
-// 		duration = m.EndTime.Sub(m.StartTime)
-// 		correctChars = game.CountCorrect(m.Results)
-// 	}
-//
-// 	wpm := ((float64(correctChars)) * (60 / duration.Seconds())) / 5
-// 	return wpm
-// }
-
-// func (m Model) CalculateRawTypingSpeed() float64 {
-// 	// Guard: return 0 if not in results state to avoid division by zero
-// 	if m.State != stateResults {
-// 		return 0
-// 	}
-//
-// 	var duration time.Duration
-// 	var correctChars, incorrectChars int
-//
-// 	if m.Mode == timedMode {
-// 		duration = time.Duration(m.initialTime) * time.Second
-// 		correctChars = game.CountCorrect(m.Results[:m.Index])
-// 		incorrectChars = game.CountIncorrect(m.Results[:m.Index])
-// 	} else {
-// 		duration = m.EndTime.Sub(m.StartTime)
-// 		correctChars = game.CountCorrect(m.Results)
-// 		incorrectChars = game.CountIncorrect(m.Results)
-// 	}
-//
-// 	wpm := ((float64(correctChars) + float64(incorrectChars)) * (60 / duration.Seconds())) / 5
-// 	return wpm
-// }
-//
-// func (m Model) CalculateAccuracy() float64 {
-// 	var correctChars int
-// 	var totalChars int
-//
-// 	if m.Mode == timedMode {
-// 		correctChars = game.CountCorrect(m.Results[:m.Index])
-// 		totalChars = m.Index // Use characters typed for timed mode
-// 	} else {
-// 		correctChars = game.CountCorrect(m.Results)
-// 		totalChars = len(m.Target)
-// 	}
-//
-// 	if totalChars == 0 {
-// 		return 0
-// 	}
-//
-// 	acc := (float64(correctChars-m.BackSpaceCount) / float64(totalChars)) * 100
-// 	return acc
-// }
 
 func (m Model) GetQuoteModel() Model {
 	quote := typing.GetQuoteUseCase(database.English, database.Mid)
