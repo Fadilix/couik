@@ -27,14 +27,14 @@ func (qts *QuoteTypeSelector) Decrement() {
 	}
 }
 
-func (qts QuoteTypeSelector) Selected() string {
+func (qts *QuoteTypeSelector) Selected() string {
 	return qts.Choices[qts.Cursor]
 }
 
-func (qts QuoteTypeSelector) GetChoices() []string {
+func (qts *QuoteTypeSelector) GetChoices() []string {
 	return qts.Choices
 }
 
-func (qts QuoteTypeSelector) GetCursor() int {
+func (qts *QuoteTypeSelector) GetCursor() int {
 	return qts.Cursor
 }

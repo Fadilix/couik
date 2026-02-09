@@ -179,24 +179,11 @@ func (m Model) View() string {
 		renderedLogo = m.CustomDashboard
 	}
 
-	content := fmt.Sprintf(
-		`%s
-
-
-%s
-
-
-%s
-
-%s
-
-%s
-%s
-%s
-%s
-%s`,
+	content := lipgloss.JoinVertical(lipgloss.Center,
 		HeaderStyle.Render(renderedLogo),
+		"\n",
 		wrappedText,
+		"\n",
 		statsRow,
 		bar,
 		lipgloss.NewStyle().Faint(true).Render("Press Esc to quit • [SHIFT + TAB] change mode"),
