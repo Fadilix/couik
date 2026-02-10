@@ -46,5 +46,14 @@ func GetPath(option fileOption) (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(appDir, filename), nil
+	fullpath := filepath.Join(appDir, filename)
+
+	if !FileExists(fullpath) {
+		err := os.WriteFile(fullpath, []byte(" "), 0o644)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return fullpath, nil
 }
