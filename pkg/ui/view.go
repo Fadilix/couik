@@ -16,6 +16,14 @@ func (m Model) View() string {
 		return m.resultsView()
 	}
 
+	if m.State == stateCommandPalette {
+		return m.commandPaletteView()
+	}
+
+	if m.State == stateConfig {
+		return m.configView()
+	}
+
 	if m.Quitting {
 		return "Closing Couik...\n"
 	}

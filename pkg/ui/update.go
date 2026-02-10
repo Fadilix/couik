@@ -85,9 +85,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.IsSelectingMode = false
 
 		case tea.KeyBackspace:
-			if m.State != stateResults {
+			if m.State == stateTyping {
 				m.Session.BackSpace()
 			}
+
+		case tea.KeyCtrlP:
+			m.State = stateCommandPalette
+
+		case tea.KeyCtrlG:
+			m.State = stateConfig
+
 		case tea.KeyShiftTab:
 			m.CurrentSelector = components.NewModeSelector()
 			m.IsSelectingMode = !m.IsSelectingMode
@@ -112,6 +119,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Session.Target)), nil
 			}
 		case tea.KeyCtrlR:
+			if m.State == stateCommandPalette || m.State == stateConfig {
+				m.State = stateTyping
+				return m, nil
+			}
 			switch m.Mode {
 			case quoteMode:
 				var option string
@@ -135,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			if m.State == stateResults {
+			if m.State != stateTyping {
 				return m, nil
 			}
 

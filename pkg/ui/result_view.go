@@ -14,14 +14,13 @@ func (m Model) resultsView() string {
 	}
 
 	// Logo Section
-	header := lipgloss.NewStyle().Foreground(CatMauve).Bold(true).Render(renderedLogo)
+	header := ViewHeaderStyle.Render(renderedLogo)
 
-	// Stats Section - Using a box to make it stand out
-	StatsTitleStyle := lipgloss.NewStyle().Foreground(CatSapphire).Bold(true).MarginBottom(1)
-
-	// Individual stat styling
-	LabelStyle := lipgloss.NewStyle().Foreground(CatSubtext).Width(15).Align(lipgloss.Left)
-	ValueStyle := lipgloss.NewStyle().Foreground(CatText).Bold(true)
+	var formattedTime string
+	if m.Mode != timedMode {
+		optionalTime := FormatTime(int(m.Session.EndTime.Sub(m.Session.StartTime).Seconds()))
+		formattedTime = fmt.Sprintf("%s %s", LabelStyle.Render("Time:"), ValueStyle.Render(optionalTime))
+	}
 
 	// Build the stats block
 	statsBox := lipgloss.JoinVertical(lipgloss.Left,
@@ -29,6 +28,7 @@ func (m Model) resultsView() string {
 		fmt.Sprintf("%s %s", LabelStyle.Render("Speed:"), ValueStyle.Render(fmt.Sprintf("%.2f WPM", m.Session.CalculateTypingSpeed()))),
 		fmt.Sprintf("%s %s", LabelStyle.Render("Raw Speed:"), ValueStyle.Render(fmt.Sprintf("%.2f WPM", m.Session.CalculateRawTypingSpeed()))),
 		fmt.Sprintf("%s %s", LabelStyle.Render("Accuracy:"), ValueStyle.Render(fmt.Sprintf("%.2f%%", m.Session.CalculateAccuracy()))),
+		formattedTime,
 	)
 
 	// Wrap stats in a subtle border or padding
@@ -38,9 +38,7 @@ func (m Model) resultsView() string {
 		Padding(1, 3).
 		Render(statsBox)
 
-	// Footer Section
-	helpStyle := lipgloss.NewStyle().Foreground(CatOverlay).MarginTop(1)
-	footer := helpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
+	footer := HelpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
 
 	modeSelectorString := ""
 	quoteTypeSelectorString := ""

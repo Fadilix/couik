@@ -29,7 +29,7 @@ func GetConfig() Config {
 }
 
 func SetConfig(key, value string) {
-	config := &Config{}
+	config := GetConfig()
 
 	availableKeys := []string{
 		"mode",
