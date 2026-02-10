@@ -41,6 +41,7 @@ const (
 const (
 	stateTyping sessionState = iota
 	stateResults
+	stateCommandPalette
 )
 
 type Model struct {
