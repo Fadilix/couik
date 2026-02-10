@@ -66,4 +66,18 @@ var (
 					BorderForeground(CatOverlay).
 					Padding(0, 1).
 					MarginTop(1)
+
+	// for the views
+	// CatMauve
+	ViewHeaderStyle = lipgloss.NewStyle().Foreground(CatMauve).Bold(true)
+
+	// Stats Section - Using a box to make it stand out
+	StatsTitleStyle = lipgloss.NewStyle().Foreground(CatSapphire).Bold(true).MarginBottom(1)
+
+	// Individual stat styling
+	LabelStyle = lipgloss.NewStyle().Foreground(CatSubtext).Width(15).Align(lipgloss.Left)
+	ValueStyle = lipgloss.NewStyle().Foreground(CatText).Bold(true)
+
+	// Footer Section
+	HelpStyle = lipgloss.NewStyle().Foreground(CatOverlay).MarginTop(1)
 )
