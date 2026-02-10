@@ -16,11 +16,7 @@ func (m Model) configView() string {
 		renderedLogo = m.CustomDashboard
 	}
 
-	header := lipgloss.NewStyle().Foreground(CatMauve).Bold(true).Render(renderedLogo)
-
-	LabelStyle := lipgloss.NewStyle().Foreground(CatMauve).Width(15).Align(lipgloss.Left)
-
-	ValueStyle := lipgloss.NewStyle().Foreground(CatSubtext).Bold(true).Width(30).Align(lipgloss.Right)
+	header := ViewHeaderStyle.Render(renderedLogo)
 
 	lines := []string{}
 	lines = append(lines, header, "\n")
@@ -30,8 +26,7 @@ func (m Model) configView() string {
 	quoteT := fmt.Sprintf("%s %s\n", LabelStyle.Render("Quote Type"), ValueStyle.Render(config.QuoteType))
 	time := fmt.Sprintf("%s %s\n", LabelStyle.Render("Time"), ValueStyle.Render(config.Time))
 
-	helpStyle := lipgloss.NewStyle().Foreground(CatOverlay).MarginTop(1)
-	footer := helpStyle.Render("[CTRL + R] return typing • [ESC] quit")
+	footer := HelpStyle.Render("[CTRL + R] return typing • [ESC] quit")
 
 	lines = append(lines, mode, dashASCII, quoteT, time, footer)
 

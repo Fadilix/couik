@@ -28,11 +28,7 @@ func (m Model) commandPaletteView() string {
 		renderedLogo = m.CustomDashboard
 	}
 
-	header := lipgloss.NewStyle().Foreground(CatMauve).Bold(true).Render(renderedLogo)
-
-	LabelStyle := lipgloss.NewStyle().Foreground(CatMauve).Width(15).Align(lipgloss.Left)
-
-	ValueStyle := lipgloss.NewStyle().Foreground(CatSubtext).Bold(true).Width(30).Align(lipgloss.Right)
+	header := ViewHeaderStyle.Render(renderedLogo)
 
 	lines := []string{}
 	lines = append(lines, header, "\n")
