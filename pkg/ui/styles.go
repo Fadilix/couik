@@ -75,8 +75,8 @@ var (
 	StatsTitleStyle = lipgloss.NewStyle().Foreground(CatSapphire).Bold(true).MarginBottom(1)
 
 	// Individual stat styling
-	LabelStyle = lipgloss.NewStyle().Foreground(CatSubtext).Width(15).Align(lipgloss.Left)
-	ValueStyle = lipgloss.NewStyle().Foreground(CatText).Bold(true)
+	LabelStyle = lipgloss.NewStyle().Foreground(CatMauve).Width(15).Align(lipgloss.Left)
+	ValueStyle = lipgloss.NewStyle().Foreground(CatSubtext).Bold(true).Width(30).Align(lipgloss.Right)
 
 	// Footer Section
 	HelpStyle = lipgloss.NewStyle().Foreground(CatOverlay).MarginTop(1)
