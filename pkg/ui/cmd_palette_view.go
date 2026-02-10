@@ -11,7 +11,7 @@ type cmdItem struct {
 	desc string
 }
 
-func (m Model) CommandPaletteView() string {
+func (m Model) commandPaletteView() string {
 	cmdPalette := []cmdItem{
 		{"ESC", "Quit"},
 		{"CTRL + R", "Refresh test / return typing)"},
@@ -34,8 +34,8 @@ func (m Model) CommandPaletteView() string {
 
 	ValueStyle := lipgloss.NewStyle().Foreground(CatSubtext).Bold(true).Width(30).Align(lipgloss.Right)
 
-	lines := []string{"\n"}
-	lines = append(lines, header)
+	lines := []string{}
+	lines = append(lines, header, "\n")
 
 	for _, value := range cmdPalette {
 		cmd := LabelStyle.Render(value.key)

@@ -17,7 +17,11 @@ func (m Model) View() string {
 	}
 
 	if m.State == stateCommandPalette {
-		return m.CommandPaletteView()
+		return m.commandPaletteView()
+	}
+
+	if m.State == stateConfig {
+		return m.configView()
 	}
 
 	if m.Quitting {
