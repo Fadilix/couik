@@ -52,9 +52,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "quote":
 					return m.GetQuoteModel(), nil
 				case "words 10":
-					return m.GetDictionnaryModelWithWords(10), nil
+					return m.GetDictionnaryModelWithWords(10, m.CurrentLanguage), nil
 				case "words 25":
-					return m.GetDictionnaryModelWithWords(25), nil
+					return m.GetDictionnaryModelWithWords(25, m.CurrentLanguage), nil
 				}
 			} else if m.IsSelectingQuoteType {
 				// selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
@@ -106,7 +106,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case quoteMode:
 					return m.GetQuoteModel(), nil
 				case wordMode:
-					return m.GetDictionnaryModelWithWords(m.InitialWords), nil
+					return m.GetDictionnaryModelWithWords(m.InitialWords, m.CurrentLanguage), nil
 				default:
 					return m.GetDictionnaryModel(m.initialTime), nil
 				}
@@ -138,7 +138,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case timedMode:
 				return m.GetDictionnaryModel(m.initialTime), nil
 			default:
-				return m.GetDictionnaryModelWithWords(m.InitialWords), nil
+				return m.GetDictionnaryModelWithWords(m.InitialWords, m.CurrentLanguage), nil
 			}
 
 		case tea.KeyRunes, tea.KeySpace:

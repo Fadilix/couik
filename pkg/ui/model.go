@@ -82,6 +82,7 @@ type Model struct {
 	// User defaults
 	// config cli.Config
 	CustomDashboard string
+	CurrentLanguage database.Language
 }
 
 func NewModel(target string) Model {
@@ -152,7 +153,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) GetQuoteModel() Model {
-	quote := typing.GetQuoteUseCase(database.English, database.Mid)
+	quote := typing.GetQuoteUseCase(m.CurrentLanguage, database.Mid)
 	target := quote.Text
 
 	newModel := NewModel(target)
@@ -166,7 +167,7 @@ func (m Model) GetQuoteModel() Model {
 }
 
 func (m Model) GetDictionnaryModel(duration int) Model {
-	newTarget := typing.GetDictionnary()
+	newTarget := typing.GetDictionnary(m.CurrentLanguage)
 
 	newModel := NewModel(newTarget)
 	newModel.TerminalHeight = m.TerminalHeight
@@ -181,9 +182,9 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 
 // GetDictionnaryModelWithWords creates a model with custom words length
 // for word mode typing tests
-func (m Model) GetDictionnaryModelWithWords(words int) Model {
+func (m Model) GetDictionnaryModelWithWords(words int, language database.Language) Model {
 	var newTarget strings.Builder
-	dictionnary := typing.GetDictionnary()
+	dictionnary := typing.GetDictionnary(language)
 
 	wordCount := 0
 
@@ -246,7 +247,7 @@ func (m Model) GetModelWithQuoteType(option string) Model {
 		category = database.Small
 	}
 
-	target := typing.GetQuoteUseCase(database.English, category)
+	target := typing.GetQuoteUseCase(m.CurrentLanguage, category)
 	quote := target.Text
 
 	newModel := NewModel(quote)

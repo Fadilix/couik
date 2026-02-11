@@ -63,21 +63,32 @@ var quotes = []string{
 }
 
 var (
-	wordsRaw = `the be to of and a in that have I it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us is are was were been being had has have having does did doing would should could might must shall will can may need dare ought used able unable must might ought` +
+	wordsEnglishaw = `the be to of and a in that have I it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us is are was were been being had has have having does did doing would should could might must shall will can may need dare ought used able unable must might ought` +
 		` able about above actually after again against all almost also although always am among an and another any anyone anything are around as at back be became because become been before being below between both but by came can cannot come could did do does doing done down during each either else enough especially even ever every everyone everything except few find first for found from further get give go goes going gone good got great had has have having he her here hers herself him himself his how however i if in into is it its itself just keep know known last later least less let like likely long look made make many may me might more most mostly much must my myself never new next no not nothing now of off often on once one only or other others our out over own part per perhaps please put quite rather really said same say see seem seemed seeming seems several she should show side since so some something sometime sometimes somewhere still such system take than that the their them themselves then there therefore these they thing think this those though thought three through thus time to together too toward try turn two under until up upon us use used using very want was way we well went were what when where whether which while who whole whose why will with within without work world would written year yet you your yours yourself` +
 		` about above across after again against all almost alone along already also although always among amount another answer any anyone anything appear around ask away back bad become been before began begin behind being believe below beside best better between beyond big black blue body book both boy bring build business but buy by call came can cannot car care carry case cause certain change child children city close cold come common company consider contain continue control could country course cut day development did different do does done door down draw during each early east easy eat economic effect either end enough even ever every everyone everything example experience eye face fact fall family far fast father feel feet few field find fine first five follow food for force foreign form former forward found four free friend from front full further game gave general get girl give go going good got government great green ground group grow had half hand happen hard has have head hear heart heavy help here herself high him himself his history hold home hope hot hour house how however human hundred I idea if important in include increase indeed information interest into it its itself job join just keep kind know known land large last late later lead learn least leave left less let life light like likely line list little live local long look lose lot low made main major make man many market matter may me mean men might mind miss money month more morning most mother move much must my myself name nation national natural nature near necessary need never new next night no not note nothing now number of off offer office often old on once one only open or order other others ought our out over own page paper part particular party pass past pay people per perhaps period person personal place plan play point political poor position possible power present president press problem probably produce product program provide public put question quite range rather read ready real really reason receive recent remain report require research result return right room run said same saw say school science second section see seem send sense serve service set several shall she short should show side since sit situation six small so social society some someone something sometimes son soon sort sound south space speak special stand start state station story strong student study success such support sure system take talk tell ten term test than that the their them themselves then there therefore these they thing think third this those though thought thousand three through time to today together too took top toward town travel true try turn under understand unit unite university until up upon us use usually value various very want war water way we week well went were what when where whether which while white who whole whose why wide wife will wish with within without woman women word work world would write year yes yet you young your`
-	dictionnary = strings.Fields(wordsRaw)
+	wordsFrenchRaw = `le de un à être et en avoir que pour dans ce il qui ne sur se pas plus pouvoir par je avec tout faire son mettre dire vous on ou nous comme mais le donner bien regarder pays premier après nouveau vouloir grand petit temps même sans sous rendre chaque main passage ainsi fois encore peu seul celui venir car suite avant fois` +
+		` monde entre si connaître alors deuxième après aussi déjà donner toujours encore sous pendant contre vers grand puis jamais car lors tant assez sans selon fois chez comme celui chaque afin après ainsi devant entre vers contre sous` +
+		` avec sans sous dans sur entre vers chez par pour vers sur devant derrière à côté de loin de au-dessus de au-dessous de en face de au milieu de au bout de au début de à la fin de au cours de pendant durant depuis il y a voici voilà`
 )
+
+func GetDictByLang(lang database.Language) []string {
+	if lang == database.English {
+		return strings.Fields(wordsEnglishaw)
+	} else {
+		return strings.Fields(wordsFrenchRaw)
+	}
+}
 
 func GetRandomQuote() string {
 	return quotes[rand.Intn(len(quotes))]
 }
 
-func GetDictionnary() string {
-	rand.Shuffle(len(dictionnary), func(i, j int) {
-		dictionnary[i], dictionnary[j] = dictionnary[j], dictionnary[i]
+func GetDictionnary(language database.Language) string {
+	dictArray := GetDictByLang(language)
+	rand.Shuffle(len(dictArray), func(i, j int) {
+		dictArray[i], dictArray[j] = dictArray[j], dictArray[i]
 	})
-	return strings.Join(dictionnary, " ")
+	return strings.Join(dictArray, " ")
 }
 
 // GetQuoteUseCase fetches quotes from database
