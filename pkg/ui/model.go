@@ -3,7 +3,6 @@ package ui
 import (
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,36 +12,27 @@ import (
 	"github.com/fadilix/couik/internal/storage"
 	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui/components"
+	"github.com/fadilix/couik/pkg/ui/core"
+	"github.com/fadilix/couik/pkg/ui/modes"
 )
-
-type TickMsg time.Time
-
-type sessionState int
 
 // Typing mode
-type TypingMode int
+// type TypingMode int
 
-const (
-	unselectedMode TypingMode = iota
-	timedMode
-	quoteMode
-	wordMode
-)
+// const (
+// 	unselectedMode TypingMode = iota
+// 	timedMode
+// 	quoteMode
+// 	wordMode
+// )
 
 // Quote mode (small, mid, thicc)
 type quoteType int
 
 const (
-	small quoteType = iota
-	mid
-	thicc
-)
-
-const (
-	stateTyping sessionState = iota
-	stateResults
-	stateCommandPalette
-	stateConfig
+	Small quoteType = iota
+	Mid
+	Thicc
 )
 
 type Model struct {
@@ -60,13 +50,13 @@ type Model struct {
 	IsSelectingMode bool
 	// Cursor          int
 	// Choices         []string
-	Mode TypingMode
+	Mode modes.ModeStrategy
 
 	// state
-	State sessionState
+	State core.SessionState
 
 	// timer
-	timeLeft    int
+	TimeLeft    int
 	initialTime int // Store the initial time duration for progress calculation
 	Active      bool
 
@@ -97,8 +87,9 @@ func NewModel(target string) Model {
 	typingModes := []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}
 	// qType := []string{"small", "mid", "thicc"}
 
-	defaultTMode := quoteMode
-	defaultQT := mid
+	// default typing mode
+
+	defaultQT := Mid
 	defaultInitTime := 30
 	defaultDashboard := ""
 
@@ -123,20 +114,14 @@ func NewModel(target string) Model {
 		}
 	}
 
-	switch config.Mode {
-	case "quote":
-		defaultTMode = quoteMode
-	case "words":
-		defaultTMode = wordMode
-	case "time":
-		defaultTMode = timedMode
-	}
+	// defaultTMode := modes.NewQuoteMode()
+	defaultTMode := modes.StringToMode(config.Mode)
 
 	return Model{
 		Session:     engine.NewSession(target),
 		ProgressBar: p,
 		// Choices:          typingModes,
-		timeLeft:     defaultInitTime,
+		TimeLeft:     defaultInitTime,
 		initialTime:  defaultInitTime,
 		Mode:         defaultTMode, // Default to quote mode since we start with a random quote
 		QuoteType:    defaultQT,    // default to mid
@@ -160,8 +145,8 @@ func (m Model) GetQuoteModel() Model {
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.timeLeft = 15
-	newModel.Mode = quoteMode
+	newModel.TimeLeft = 15
+	newModel.Mode = modes.NewQuoteMode()
 
 	return newModel
 }
@@ -173,9 +158,9 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.timeLeft = duration
+	newModel.TimeLeft = duration
 	newModel.initialTime = duration
-	newModel.Mode = timedMode
+	newModel.Mode = modes.NewTimeMode()
 
 	return newModel
 }
@@ -201,7 +186,7 @@ func (m Model) GetDictionnaryModelWithWords(words int, language database.Languag
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.Mode = wordMode
+	newModel.Mode = modes.NewWordMode()
 	newModel.InitialWords = words
 
 	return newModel
@@ -214,7 +199,7 @@ func (m Model) GetModelWithCustomTarget(target string) Model {
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.Mode = wordMode
+	newModel.Mode = modes.NewWordMode()
 	newModel.InitialWords = len([]rune(target))
 
 	return newModel
@@ -227,8 +212,8 @@ func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Mode
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.timeLeft = initialTime
-	newModel.Mode = timedMode
+	newModel.TimeLeft = initialTime
+	newModel.Mode = modes.NewTimeMode()
 	newModel.InitialWords = len([]rune(target))
 	newModel.initialTime = initialTime
 
@@ -255,13 +240,27 @@ func (m Model) GetModelWithQuoteType(option string) Model {
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.Mode = quoteMode
+	newModel.Mode = modes.NewQuoteMode()
 
 	return newModel
 }
 
-func Tick() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
-		return TickMsg(t)
-	})
+func (m Model) GetTimeLeft() int {
+	return m.TimeLeft
+}
+
+func (m Model) SetTimeLeft(t int) {
+	m.TimeLeft = t
+}
+
+func (m Model) Deactivate() {
+	m.Active = false
+}
+
+func (m Model) SetState(s core.SessionState) {
+	m.State = s
+}
+
+func (m Model) GetSession() *engine.Session {
+	return m.Session
 }

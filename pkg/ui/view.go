@@ -7,20 +7,22 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fadilix/couik/pkg/typing/stats"
+	"github.com/fadilix/couik/pkg/ui/core"
+	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
 var dashboardLogo string = CouikASCII3
 
 func (m Model) View() string {
-	if m.State == stateResults || m.timeLeft <= 0 {
+	if m.State == core.StateResults || m.TimeLeft <= 0 {
 		return m.resultsView()
 	}
 
-	if m.State == stateCommandPalette {
+	if m.State == core.StateCommandPalette {
 		return m.commandPaletteView()
 	}
 
-	if m.State == stateConfig {
+	if m.State == core.StateConfig {
 		return m.configView()
 	}
 
@@ -133,8 +135,10 @@ func (m Model) View() string {
 	statsRow := lipgloss.JoinHorizontal(lipgloss.Top, wpmDisplay, accDisplay)
 
 	var percent float64
-	if m.Mode == timedMode && m.initialTime > 0 {
-		percent = float64(m.initialTime-m.timeLeft) / float64(m.initialTime)
+	_, isTimeMode := m.Mode.(*modes.TimeMode)
+
+	if isTimeMode && m.initialTime > 0 {
+		percent = float64(m.initialTime-m.TimeLeft) / float64(m.initialTime)
 	} else {
 		percent = float64(m.Session.Index) / float64(len(m.Session.Target))
 	}
@@ -178,8 +182,10 @@ func (m Model) View() string {
 
 	timer := ""
 	words := ""
-	if m.Mode == timedMode {
-		timer = fmt.Sprintf("%d\n", m.timeLeft)
+	// _, isTimeMode := m.Mode.(*modes.TimeMode)
+
+	if isTimeMode {
+		timer = fmt.Sprintf("%d\n", m.TimeLeft)
 	} else {
 		words = fmt.Sprintf("%d/%d\n", m.Session.Index, len(string(m.Session.Target)))
 	}

@@ -6,22 +6,28 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/pkg/ui/components"
+	"github.com/fadilix/couik/pkg/ui/core"
+	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case TickMsg:
-		if m.Mode == timedMode {
-			m.timeLeft--
-			// Check if time is up AFTER decrementing to avoid delay at the end
-			if m.timeLeft <= 0 {
-				m.Active = false
-				m.State = stateResults
-				m.Session.EndTime = time.Now()
-				return m, nil
-			}
-			return m, Tick()
-		}
+	case core.TickMsg:
+		cmd := m.Mode.ProcessTick(m)
+		return m, cmd
+		// return &m.Mode.P
+		// m.Mode.P
+		// if m.Mode == timedMode {
+		// 	m.TimeLeft--
+		// 	// Check if time is up AFTER decrementing to avoid delay at the end
+		// 	if m.TimeLeft <= 0 {
+		// 		m.Active = false
+		// 		m.State = StateResults
+		// 		m.Session.EndTime = time.Now()
+		// 		return m, nil
+		// 	}
+		// 	return m, Tick()
+		// }
 
 	case tea.WindowSizeMsg:
 		m.TerminalWidth = msg.Width
@@ -62,13 +68,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				switch selected {
 				case "small":
-					m.QuoteType = small
+					m.QuoteType = Small
 					return m.GetModelWithQuoteType("small"), nil
 				case "mid":
-					m.QuoteType = mid
+					m.QuoteType = Mid
 					return m.GetModelWithQuoteType("mid"), nil
 				case "thicc":
-					m.QuoteType = thicc
+					m.QuoteType = Thicc
 					return m.GetModelWithQuoteType("thicc"), nil
 				}
 			}
@@ -85,15 +91,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.IsSelectingMode = false
 
 		case tea.KeyBackspace:
-			if m.State == stateTyping {
+			if m.State == core.StateTyping {
 				m.Session.BackSpace()
 			}
 
 		case tea.KeyCtrlP:
-			m.State = stateCommandPalette
+			m.State = core.StateCommandPalette
 
 		case tea.KeyCtrlG:
-			m.State = stateConfig
+			m.State = core.StateConfig
 
 		case tea.KeyShiftTab:
 			m.CurrentSelector = components.NewModeSelector()
@@ -101,7 +107,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.IsSelectingQuoteType = false
 
 		case tea.KeyTab:
-			if m.State == stateResults {
+			if m.State == core.StateResults {
 				switch m.Mode {
 				case quoteMode:
 					return m.GetQuoteModel(), nil
@@ -112,47 +118,49 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case tea.KeyCtrlL:
-			if m.State == stateResults {
-				if m.Mode != timedMode {
-					return m.GetModelWithCustomTarget(string(m.Session.Target)), nil
-				}
+			if m.State == core.StateResults {
+				// if m.Mode != timedMode {
+				// 	return m.GetModelWithCustomTarget(string(m.Session.Target)), nil
+				// }
 				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Session.Target)), nil
 			}
 		case tea.KeyCtrlR:
-			if m.State == stateCommandPalette || m.State == stateConfig {
-				m.State = stateTyping
+			if m.State == core.StateCommandPalette || m.State == core.StateConfig {
+				m.State = core.StateTyping
 				return m, nil
 			}
-			switch m.Mode {
-			case quoteMode:
-				var option string
-				switch m.QuoteType {
-				case mid:
-					option = "mid"
-				case thicc:
-					option = "thicc"
-				default:
-					option = "small"
-				}
-				return m.GetModelWithQuoteType(option), nil
-			case timedMode:
-				return m.GetDictionnaryModel(m.initialTime), nil
-			default:
-				return m.GetDictionnaryModelWithWords(m.InitialWords, m.CurrentLanguage), nil
-			}
+			// switch m.Mode {
+			// case quoteMode:
+			// 	var option string
+			// 	switch m.QuoteType {
+			// 	case Mid:
+			// 		option = "mid"
+			// 	case Thicc:
+			// 		option = "thicc"
+			// 	default:
+			// 		option = "small"
+			// 	}
+			// 	return m.GetModelWithQuoteType(option), nil
+			// case timedMode:
+			// 	return m.GetDictionnaryModel(m.initialTime), nil
+			// default:
+			// 	return m.GetDictionnaryModelWithWords(m.InitialWords, m.CurrentLanguage), nil
+			// }
 
 		case tea.KeyRunes, tea.KeySpace:
 			if m.IsSelectingMode {
 				return m, nil
 			}
 
-			if m.State != stateTyping {
+			if m.State != core.StateTyping {
 				return m, nil
 			}
 
 			// Track if we need to start the timer
+			_, isTimeMode := m.Mode.(*modes.TimeMode)
 			var startTimer bool
-			if !m.Active && m.Mode == timedMode {
+
+			if !m.Active && isTimeMode {
 				m.Active = true
 				startTimer = true
 			}
@@ -162,7 +170,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			if m.Session.IsFinished() {
-				m.State = stateResults
+				m.State = core.StateResults
 				result := database.TestResult{
 					RawWPM:   m.Session.CalculateRawTypingSpeed(),
 					WPM:      m.Session.CalculateTypingSpeed(),
@@ -176,7 +184,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Start the timer if needed
 			if startTimer {
-				return m, Tick()
+				return m, core.Tick()
 			}
 		}
 	}
