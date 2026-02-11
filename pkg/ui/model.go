@@ -188,14 +188,14 @@ func (m Model) GetDictionnaryModelWithWords(words int, language database.Languag
 
 	wordCount := 0
 
-	for i := range dictionnary {
-		if string(dictionnary[i]) == " " {
+	for _, r := range dictionnary {
+		if r == ' ' {
 			wordCount++
 			if wordCount == words {
 				break
 			}
 		}
-		newTarget.WriteString(string(dictionnary[i]))
+		newTarget.WriteRune(r)
 	}
 	newModel := NewModel(newTarget.String())
 	newModel.TerminalHeight = m.TerminalHeight

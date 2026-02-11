@@ -72,11 +72,13 @@ var (
 )
 
 func GetDictByLang(lang database.Language) []string {
+	var raw string
 	if lang == database.English {
-		return strings.Fields(wordsEnglishaw)
+		raw = wordsEnglishaw
 	} else {
-		return strings.Fields(wordsFrenchRaw)
+		raw = wordsFrenchRaw
 	}
+	return strings.Fields(raw)
 }
 
 func GetRandomQuote() string {

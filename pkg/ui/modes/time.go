@@ -1,15 +1,19 @@
 package modes
 
-import "github.com/fadilix/couik/pkg/typing"
+import (
+	"github.com/fadilix/couik/database"
+	"github.com/fadilix/couik/pkg/typing"
+)
 
 type TimeMode struct {
 	Duration int
+	Language database.Language
 }
 
-func (m TimeMode) GetTarget() string {
-	return typing.GetDictionnary()
+func (t TimeMode) GetTarget() string {
+	return typing.GetDictionnary(t.Language)
 }
 
-func (m TimeMode) GetInitialTime() int {
-	return m.Duration
+func (t TimeMode) GetInitialTime() int {
+	return t.Duration
 }

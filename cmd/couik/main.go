@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/cmd/couik/cli"
@@ -32,6 +33,16 @@ func main() {
 
 	if cli.Lang != "" {
 		if cli.Lang == "french" {
+			choosedLanguage = database.French
+		} else {
+			choosedLanguage = database.English
+		}
+	}
+
+	configLang := cli.GetConfig().Language
+
+	if slices.Contains([]string{"french", "english"}, configLang) {
+		if configLang == "french" {
 			choosedLanguage = database.French
 		} else {
 			choosedLanguage = database.English
