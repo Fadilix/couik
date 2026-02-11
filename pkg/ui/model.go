@@ -2,6 +2,7 @@ package ui
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -118,11 +119,13 @@ func NewModel(target string) Model {
 
 	defaultTMode := modes.StringToMode(config.Mode, *modeConfigContext)
 
+	currentTime := defaultTMode.GetInitialTime()
+
 	return Model{
 		Session:         engine.NewSession(target),
 		ProgressBar:     p,
-		TimeLeft:        defaultInitTime,
-		initialTime:     defaultTMode.GetInitialTime(),
+		TimeLeft:        currentTime,
+		initialTime:     currentTime,
 		Mode:            defaultTMode, // Default to quote mode since we start with a random quote
 		QuoteType:       defaultQT,    // default to mid
 		InitialWords:    50,
@@ -134,20 +137,6 @@ func NewModel(target string) Model {
 
 func (m Model) Init() tea.Cmd {
 	return nil
-}
-
-func (m Model) GetQuoteModel() Model {
-	quote := typing.GetQuoteUseCase(m.CurrentLanguage, database.Mid)
-	target := quote.Text
-
-	newModel := NewModel(target)
-	newModel.TerminalHeight = m.TerminalHeight
-	newModel.TerminalWidth = m.TerminalWidth
-	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.TimeLeft = 15
-	newModel.Mode = modes.NewQuoteMode()
-
-	return newModel
 }
 
 func (m Model) GetDictionnaryModel(duration int) Model {
@@ -192,89 +181,70 @@ func (m Model) GetDictionnaryModelWithWords(words int, language database.Languag
 	return newModel
 }
 
-// GetModelWithCustomTarget creates a model with custom target
-// for word mode typing tests
-func (m Model) GetModelWithCustomTarget(target string) Model {
-	newModel := NewModel(target)
-	newModel.TerminalHeight = m.TerminalHeight
+// ApplyMode creates a new Model instance configured with the given strategy,
+// preserving UI state from the current model
+func (m Model) ApplyMode(mode modes.ModeStrategy) Model {
+	config := mode.GetConfig()
+
+	// create base model with target
+	newModel := NewModel(config.Target)
+
+	// apply mode strategy nd config
+	newModel.Mode = mode
+	newModel.CurrentLanguage = config.Language
+	newModel.InitialWords = config.InitialWords
+	newModel.QuoteType = config.Category
+
+	// set time logic correctly
+	newModel.TimeLeft = config.InitialTime
+	newModel.initialTime = config.InitialTime
+
+	// preserve ui state
 	newModel.TerminalWidth = m.TerminalWidth
-	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.Mode = modes.NewWordMode(modes.WithTargetW(target), modes.WithInitialWords(len([]rune(target))))
-	newModel.InitialWords = len([]rune(target))
+	newModel.TerminalHeight = m.TerminalHeight
+	newModel.ProgressBar = m.ProgressBar
+	newModel.Repo = m.Repo
+	newModel.CustomDashboard = m.CustomDashboard
 
 	return newModel
 }
 
-// GetTimeModelWithCustomTarget creates a model with custom target
-// for time mode typing tests
-func (m Model) GetTimeModelWithCustomTarget(initialTime int, target string) Model {
-	newModel := NewModel(target)
-	newModel.TerminalHeight = m.TerminalHeight
-	newModel.TerminalWidth = m.TerminalWidth
-	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.TimeLeft = initialTime
-	newModel.Mode = modes.NewTimeMode(modes.WithTargetT(target))
-	newModel.InitialWords = len([]rune(target))
-	newModel.initialTime = initialTime
+// GetModelFromMode does the same as the one above
+// but just for the specific case of keytab
+func (m *Model) GetModelFromMode(mod Model) Model {
+	config := mod.Mode.GetConfig()
+	model := NewModel(config.Target)
 
-	return newModel
-}
-
-func (m Model) GetModelWithQuoteType(quoteOption string) Model {
-	var category database.QuoteCategory
-
-	switch quoteOption {
-	case "mid":
-		category = database.Mid
-	case "thicc":
-		category = database.Thicc
-	default:
-		category = database.Small
-	}
-
-	target := typing.GetQuoteUseCase(m.CurrentLanguage, category)
-	quote := target.Text
-
-	newModel := NewModel(quote)
-	newModel.CurrentLanguage = m.CurrentLanguage
-	newModel.TerminalHeight = m.TerminalHeight
-	newModel.TerminalWidth = m.TerminalWidth
-	newModel.ProgressBar.Width = m.ProgressBar.Width
-	newModel.Mode = modes.NewQuoteMode(modes.WithCategoryQ(category), modes.WithTargetQ(target.Text), modes.WithLanguageQ(m.CurrentLanguage))
-
-	return newModel
-}
-
-func (m *Model) GetTimeLeft() int {
-	return m.TimeLeft
-}
-
-func (m *Model) SetTimeLeft(t int) {
-	m.TimeLeft = t
-}
-
-func (m *Model) Deactivate() {
-	m.Active = false
-}
-
-func (m *Model) SetState(s core.SessionState) {
-	m.State = s
-}
-
-func (m *Model) GetSession() *engine.Session {
-	return m.Session
-}
-
-func (m *Model) GetModelFromMode(mode modes.ModeStrategy) Model {
-	modeConfig := mode.GetConfig()
-
-	model := NewModel(modeConfig.Target)
-	model.InitialWords = m.InitialWords
-	model.CurrentLanguage = modeConfig.Language
-	model.Mode = mode
+	model.Mode = mod.Mode
+	model.CurrentLanguage = config.Language
+	model.initialTime = mod.initialTime
+	model.TimeLeft = mod.initialTime
+	model.InitialWords = mod.InitialWords
 	model.TerminalHeight = m.TerminalHeight
 	model.TerminalWidth = m.TerminalWidth
 	model.ProgressBar = m.ProgressBar
-
 	return model
+}
+
+// CreateModeFromSelection parses the selection string and returns the appropriate ModeStrategy.
+// It handles dynamic cases like "15s", "words 10"
+func CreateModeFromSelection(selection string, lang database.Language) modes.ModeStrategy {
+	// Time Mode
+	if strings.HasSuffix(selection, "s") {
+		seconds, _ := strconv.Atoi(strings.TrimSuffix(selection, "s"))
+		return modes.NewTimeMode(modes.WithInitialTimeT(seconds), modes.WithLanguageT(lang))
+	}
+
+	// Word Mode
+	if strings.HasPrefix(selection, "words ") {
+		count, _ := strconv.Atoi(strings.TrimPrefix(selection, "words "))
+		return modes.NewWordMode(modes.WithInitialWords(count), modes.WithLanguageW(lang))
+	}
+
+	// Quote Mode
+	if selection == "quote" {
+		return modes.NewQuoteMode(modes.WithLanguageQ(lang))
+	}
+
+	return nil
 }

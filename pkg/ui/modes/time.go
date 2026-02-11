@@ -56,6 +56,10 @@ func WithInitialTimeT(initTime int) TimeOption {
 }
 
 func (t TimeMode) ProcessTick(ctx TickContext) tea.Cmd {
+	if !ctx.IsActive() {
+		return nil
+	}
+
 	ctx.SetTimeLeft(ctx.GetTimeLeft() - 1)
 
 	if ctx.GetTimeLeft() <= 0 {
@@ -70,7 +74,8 @@ func (t TimeMode) ProcessTick(ctx TickContext) tea.Cmd {
 
 func (t TimeMode) GetConfig() core.ModeConfig {
 	return core.ModeConfig{
-		Target:   t.GetTarget(),
-		Language: t.Language,
+		Target:      t.GetTarget(),
+		Language:    t.Language,
+		InitialTime: t.InitialTime,
 	}
 }

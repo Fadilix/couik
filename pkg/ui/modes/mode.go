@@ -16,6 +16,7 @@ type ModeStrategy interface {
 type TickContext interface {
 	GetTimeLeft() int
 	SetTimeLeft(t int)
+	IsActive() bool
 	Deactivate()
 	SetState(s core.SessionState)
 	GetSession() *engine.Session

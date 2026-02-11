@@ -15,17 +15,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case core.TickMsg:
 		cmd := m.Mode.ProcessTick(&m)
 		return m, cmd
-		// if m.Mode == timedMode {
-		// 	m.TimeLeft--
-		// 	// Check if time is up AFTER decrementing to avoid delay at the end
-		// 	if m.TimeLeft <= 0 {
-		// 		m.Active = false
-		// 		m.State = StateResults
-		// 		m.Session.EndTime = time.Now()
-		// 		return m, nil
-		// 	}
-		// 	return m, Tick()
-		// }
 
 	case tea.WindowSizeMsg:
 		m.TerminalWidth = msg.Width
@@ -44,21 +33,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if m.IsSelectingMode {
 				selected := m.CurrentSelector.Selected()
-				switch selected {
-				case "15s":
-					return m.GetDictionnaryModel(15), nil
-				case "30s":
-					return m.GetDictionnaryModel(30), nil
-				case "60s":
-					return m.GetDictionnaryModel(60), nil
-				case "120s":
-					return m.GetDictionnaryModel(120), nil
-				case "quote":
-					return m.GetQuoteModel(), nil
-				case "words 10":
-					return m.GetDictionnaryModelWithWords(10, m.CurrentLanguage), nil
-				case "words 25":
-					return m.GetDictionnaryModelWithWords(25, m.CurrentLanguage), nil
+				if mode := CreateModeFromSelection(selected, m.CurrentLanguage); mode != nil {
+					return m.ApplyMode(mode), nil
 				}
 			} else if m.IsSelectingQuoteType {
 				// selected := m.QuoteTypeChoices[m.QuoteTypeCursor]
@@ -67,13 +43,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				switch selected {
 				case "small":
 					m.QuoteType = database.Small
-					return m.GetModelWithQuoteType("small"), nil
+					return m.ApplyMode(modes.NewQuoteMode(modes.WithCategoryQ(database.Small), modes.WithLanguageQ(m.CurrentLanguage))), nil
 				case "mid":
 					m.QuoteType = database.Mid
-					return m.GetModelWithQuoteType("mid"), nil
+					return m.ApplyMode(modes.NewQuoteMode(modes.WithCategoryQ(database.Mid), modes.WithLanguageQ(m.CurrentLanguage))), nil
 				case "thicc":
 					m.QuoteType = database.Thicc
-					return m.GetModelWithQuoteType("thicc"), nil
+					return m.ApplyMode(modes.NewQuoteMode(modes.WithCategoryQ(database.Thicc), modes.WithLanguageQ(m.CurrentLanguage))), nil
 				}
 			}
 		}
@@ -106,7 +82,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.KeyTab:
 			if m.State == core.StateResults {
-				return m.GetModelFromMode(m.Mode), nil
+				return m.GetModelFromMode(m), nil
 				// switch m.Mode {
 				// case quoteMode:
 				// 	return m.GetQuoteModel(), nil
@@ -118,33 +94,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case tea.KeyCtrlL:
 			if m.State == core.StateResults {
-				// if m.Mode != timedMode {
-				// 	return m.GetModelWithCustomTarget(string(m.Session.Target)), nil
-				// }
-				return m.GetTimeModelWithCustomTarget(m.initialTime, string(m.Session.Target)), nil
+				return m.ApplyMode(m.Mode), nil
 			}
 		case tea.KeyCtrlR:
 			if m.State == core.StateCommandPalette || m.State == core.StateConfig {
 				m.State = core.StateTyping
 				return m, nil
 			}
-			switch m.Mode.(type) {
-			case *modes.QuoteMode:
-				var option string
-				switch m.QuoteType {
-				case database.Mid:
-					option = "mid"
-				case database.Thicc:
-					option = "thicc"
-				default:
-					option = "small"
-				}
-				return m.GetModelWithQuoteType(option), nil
-			case *modes.TimeMode:
-				return m.GetDictionnaryModel(m.initialTime), nil
-			default:
-				return m.GetDictionnaryModelWithWords(m.InitialWords, m.CurrentLanguage), nil
-			}
+			return m.ApplyMode(m.Mode), nil
 
 		case tea.KeyRunes, tea.KeySpace:
 			if m.IsSelectingMode {

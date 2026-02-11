@@ -14,7 +14,8 @@ import (
 var dashboardLogo string = CouikASCII3
 
 func (m Model) View() string {
-	if m.State == core.StateResults || m.TimeLeft <= 0 {
+	_, isTimeMode := m.Mode.(*modes.TimeMode)
+	if m.State == core.StateResults || (isTimeMode && m.TimeLeft <= 0) {
 		return m.resultsView()
 	}
 
@@ -135,12 +136,12 @@ func (m Model) View() string {
 	statsRow := lipgloss.JoinHorizontal(lipgloss.Top, wpmDisplay, accDisplay)
 
 	var percent float64
-	_, isTimeMode := m.Mode.(*modes.TimeMode)
-
 	if isTimeMode && m.initialTime > 0 {
 		percent = float64(m.initialTime-m.TimeLeft) / float64(m.initialTime)
-	} else {
+	} else if len(m.Session.Target) > 0 {
 		percent = float64(m.Session.Index) / float64(len(m.Session.Target))
+	} else {
+		percent = 0
 	}
 	bar := m.ProgressBar.ViewAs(percent)
 
