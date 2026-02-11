@@ -4,14 +4,15 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/pkg/typing"
+	"github.com/fadilix/couik/pkg/ui/core"
 )
 
 type StaticMode struct {
 	Target string
 }
 
-func (s StaticMode) GetTarget() string {
-	return s.Target
+func (qm StaticMode) GetTarget() string {
+	return qm.Target
 }
 
 func NewStaticMode() *StaticMode {
@@ -21,10 +22,16 @@ func NewStaticMode() *StaticMode {
 	return sm
 }
 
-func (s StaticMode) GetInitialTime() int {
+func (qm StaticMode) GetInitialTime() int {
 	return 0
 }
 
-func (s StaticMode) ProcessTick(ctx TickContext) tea.Cmd {
+func (qm StaticMode) ProcessTick(ctx TickContext) tea.Cmd {
 	return nil
+}
+
+func (s StaticMode) GetConfig() core.ModeConfig {
+	return core.ModeConfig{
+		Target: s.Target,
+	}
 }

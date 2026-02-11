@@ -4,6 +4,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/fadilix/couik/database"
 )
 
 type SessionState int
@@ -14,6 +15,23 @@ const (
 	StateCommandPalette
 	StateConfig
 )
+
+// type QuoteType int
+//
+// const (
+// 	Small QuoteType = iota
+// 	Mid
+// 	Thicc
+// )
+
+type ModeConfig struct {
+	Target       string
+	Duration     int
+	InitialWords int
+	Language     database.Language
+	Category     database.QuoteCategory
+	InitialTime  int
+}
 
 type TickMsg time.Time
 

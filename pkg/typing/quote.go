@@ -95,7 +95,7 @@ func GetDictionnary(language database.Language) string {
 
 // GetQuoteUseCase fetches quotes from database
 // and returns the list according to the language and category
-func GetQuoteUseCase(lang database.Language, category database.Category) database.Quote {
+func GetQuoteUseCase(lang database.Language, category database.QuoteCategory) database.Quote {
 	quotes := database.GetQuotes(lang, category)
 	return quotes[rand.Intn(len(quotes))]
 }

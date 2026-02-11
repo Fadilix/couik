@@ -37,8 +37,8 @@ func TestIntegrationGameLoop(t *testing.T) {
 	}
 
 	// Get the result
-	if m.State != stateResults {
-		t.Errorf("Expected state to be stateResults (%d), got %d", stateResults, m.State)
+	if m.State != StateResults {
+		t.Errorf("Expected state to be stateResults (%d), got %d", StateResults, m.State)
 	}
 
 	// Verify accuracy is 100%

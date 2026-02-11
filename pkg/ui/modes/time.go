@@ -10,15 +10,16 @@ import (
 )
 
 type TimeMode struct {
-	Duration int
-	Language database.Language
+	Target      string
+	Language    database.Language
+	InitialTime int
 }
 
-type TimeOption func(tm *TimeMode)
+type TimeOption func(*TimeMode)
 
 func NewTimeMode(options ...TimeOption) *TimeMode {
 	tm := &TimeMode{
-		Duration: 60,
+		Target:   typing.GetDictionnary(database.English),
 		Language: database.English,
 	}
 
@@ -33,7 +34,25 @@ func (t TimeMode) GetTarget() string {
 }
 
 func (t TimeMode) GetInitialTime() int {
-	return t.Duration
+	return t.InitialTime
+}
+
+func WithLanguageT(language database.Language) TimeOption {
+	return func(tm *TimeMode) {
+		tm.Language = language
+	}
+}
+
+func WithTargetT(target string) TimeOption {
+	return func(tm *TimeMode) {
+		tm.Target = target
+	}
+}
+
+func WithInitialTimeT(initTime int) TimeOption {
+	return func(tm *TimeMode) {
+		tm.InitialTime = initTime
+	}
 }
 
 func (t TimeMode) ProcessTick(ctx TickContext) tea.Cmd {
@@ -47,4 +66,11 @@ func (t TimeMode) ProcessTick(ctx TickContext) tea.Cmd {
 	}
 
 	return core.Tick()
+}
+
+func (t TimeMode) GetConfig() core.ModeConfig {
+	return core.ModeConfig{
+		Target:   t.GetTarget(),
+		Language: t.Language,
+	}
 }

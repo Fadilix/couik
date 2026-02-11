@@ -92,3 +92,10 @@ func GetTextFromFile(filepath string) (string, error) {
 	}
 	return strings.TrimSpace(string(quote)), nil
 }
+
+func ParseConfigLang(language string) database.Language {
+	if language == "french" {
+		return database.French
+	}
+	return database.English
+}

@@ -7,6 +7,7 @@ import (
 )
 
 type ModeStrategy interface {
+	GetConfig() core.ModeConfig
 	GetTarget() string
 	GetInitialTime() int
 	ProcessTick(TickContext) tea.Cmd
