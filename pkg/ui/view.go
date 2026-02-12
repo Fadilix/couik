@@ -131,9 +131,10 @@ func (m Model) View() string {
 		liveAcc, _ = stats.CalculateAccuracy(correctCount, m.Session.Index, m.Session.BackSpaceCount)
 	}
 
-	wpmDisplay := StatsStyle.Render(fmt.Sprintf("WPM: %.2f", liveWpm))
-	accDisplay := StatsStyle.Render(fmt.Sprintf("ACC: %.2f%%", liveAcc))
-	statsRow := lipgloss.JoinHorizontal(lipgloss.Top, wpmDisplay, accDisplay)
+	wpmDisplay := StatsStyle.Render(fmt.Sprintf("%.0f wpm", liveWpm))
+	accDisplay := StatsStyle.Render(fmt.Sprintf("%.1f%% acc", liveAcc))
+	statDivider := lipgloss.NewStyle().Foreground(CatSurface).Render(" │ ")
+	statsRow := lipgloss.JoinHorizontal(lipgloss.Center, wpmDisplay, statDivider, accDisplay)
 
 	var percent float64
 	if isTimeMode && m.initialTime > 0 {
@@ -186,9 +187,9 @@ func (m Model) View() string {
 	// _, isTimeMode := m.Mode.(*modes.TimeMode)
 
 	if isTimeMode {
-		timer = fmt.Sprintf("%d\n", m.TimeLeft)
+		timer = lipgloss.NewStyle().Foreground(CatText).Bold(true).Render(fmt.Sprintf("%d", m.TimeLeft))
 	} else {
-		words = fmt.Sprintf("%d/%d\n", m.Session.Index, len(string(m.Session.Target)))
+		words = lipgloss.NewStyle().Foreground(CatOverlay).Render(fmt.Sprintf("%d/%d", m.Session.Index, len(string(m.Session.Target))))
 	}
 
 	renderedLogo := dashboardLogo
@@ -197,15 +198,29 @@ func (m Model) View() string {
 		renderedLogo = m.CustomDashboard
 	}
 
+	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
+	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
+
+	footerText := lipgloss.JoinHorizontal(lipgloss.Center,
+		footerKey.Render("esc "), footerDesc.Render("quit"),
+		footerDesc.Render("  •  "),
+		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
+	)
+
 	content := lipgloss.JoinVertical(lipgloss.Center,
 		HeaderStyle.Render(renderedLogo),
-		"\n",
+		"",
+		"",
 		wrappedText,
-		"\n",
+		"",
+		"",
 		statsRow,
+		"",
 		bar,
-		lipgloss.NewStyle().Faint(true).Render("[Esc] Quit • [CTRL+P] Command Palette"),
-		"\n",
+		"",
+		"",
+		footerText,
+		"",
 		timer,
 		words,
 		modeSelectorString,

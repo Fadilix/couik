@@ -20,4 +20,6 @@ type TickContext interface {
 	Deactivate()
 	SetState(s core.SessionState)
 	GetSession() *engine.Session
+	GetTerminalWidth() int
+	CacheChart()
 }
