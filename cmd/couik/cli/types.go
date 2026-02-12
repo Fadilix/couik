@@ -5,4 +5,5 @@ type Config struct {
 	DashboardASCII string `yaml:"dashboard_ascii"` // path for custom dashboard ascii
 	QuoteType      string `yaml:"quote_type"`      // small, mid, thicc
 	Time           string `yaml:"time"`            // prefered time (30, 60, etc...)
+	Language       string `yaml:"language"`        // preferred language for tests
 }

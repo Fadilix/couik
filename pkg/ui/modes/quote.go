@@ -1,20 +1,69 @@
 package modes
 
 import (
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/pkg/typing"
+	"github.com/fadilix/couik/pkg/ui/core"
 )
 
 type QuoteMode struct {
+	Target   string
 	Language database.Language
-	Category database.Category
+	Category database.QuoteCategory
 }
 
-func (q QuoteMode) GetTarget() string {
-	quote := typing.GetQuoteUseCase(q.Language, q.Category)
+type QuoteOption func(qm *QuoteMode)
+
+func NewQuoteMode(options ...QuoteOption) *QuoteMode {
+	qm := &QuoteMode{
+		Target:   typing.GetQuoteUseCase(database.English, database.Mid).Text,
+		Language: database.English,
+		Category: database.Mid,
+	}
+
+	for _, option := range options {
+		option(qm)
+	}
+
+	return qm
+}
+
+func (qm QuoteMode) GetTarget() string {
+	quote := typing.GetQuoteUseCase(qm.Language, qm.Category)
 	return quote.Text
 }
 
-func (q QuoteMode) GetInitialTime() int {
+func (qm QuoteMode) GetInitialTime() int {
 	return 0
+}
+
+func WithLanguageQ(language database.Language) QuoteOption {
+	return func(qm *QuoteMode) {
+		qm.Language = language
+	}
+}
+
+func WithTargetQ(target string) QuoteOption {
+	return func(qm *QuoteMode) {
+		qm.Target = target
+	}
+}
+
+func WithCategoryQ(category database.QuoteCategory) QuoteOption {
+	return func(qm *QuoteMode) {
+		qm.Category = category
+	}
+}
+
+func (qm QuoteMode) ProcessTick(ctx TickContext) tea.Cmd {
+	return nil
+}
+
+func (qm QuoteMode) GetConfig() core.ModeConfig {
+	return core.ModeConfig{
+		Target:   qm.GetTarget(),
+		Language: qm.Language,
+		Category: qm.Category,
+	}
 }

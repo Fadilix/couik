@@ -36,6 +36,7 @@ func SetConfig(key, value string) {
 		"dashboard_ascii",
 		"quote_type",
 		"time",
+		"language",
 	}
 
 	if !slices.Contains(availableKeys, key) {
@@ -64,8 +65,11 @@ func SetConfig(key, value string) {
 		if !slices.Contains([]string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}, value) {
 			log.Fatal("You can't use that value as preffered time")
 		}
-
-		config.Time = value
+	case "language":
+		if !slices.Contains([]string{"french", "english"}, value) {
+			log.Fatal("Can't use this language (only english and french available for now)")
+		}
+		config.Language = value
 	}
 
 	path, err := database.GetPath(database.Config)
@@ -87,4 +91,11 @@ func GetTextFromFile(filepath string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(quote)), nil
+}
+
+func ParseConfigLang(language string) database.Language {
+	if language == "french" {
+		return database.French
+	}
+	return database.English
 }

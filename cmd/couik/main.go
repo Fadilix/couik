@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/cmd/couik/cli"
@@ -28,13 +29,35 @@ func main() {
 		return
 	}
 
-	randomQuote := typing.GetQuoteUseCase(database.English, database.Mid)
+	var choosedLanguage database.Language
+
+	if cli.Lang != "" {
+		if cli.Lang == "french" {
+			choosedLanguage = database.French
+		} else {
+			choosedLanguage = database.English
+		}
+	}
+
+	configLang := cli.GetConfig().Language
+
+	if slices.Contains([]string{"french", "english"}, configLang) {
+		if configLang == "french" {
+			choosedLanguage = database.French
+		} else {
+			choosedLanguage = database.English
+		}
+	}
+
+	randomQuote := typing.GetQuoteUseCase(choosedLanguage, database.Mid)
+
 	target := randomQuote.Text
 
 	m := ui.NewModel(target)
+	m.CurrentLanguage = choosedLanguage
 
 	if cli.Words > 0 {
-		m = m.GetDictionnaryModelWithWords(cli.Words)
+		m = m.GetDictionnaryModelWithWords(cli.Words, choosedLanguage)
 	} else if cli.Time > 0 {
 		m = m.GetDictionnaryModel(cli.Time)
 	} else if cli.File != "" {

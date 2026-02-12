@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
 func (m Model) resultsView() string {
@@ -17,7 +18,9 @@ func (m Model) resultsView() string {
 	header := ViewHeaderStyle.Render(renderedLogo)
 
 	var formattedTime string
-	if m.Mode != timedMode {
+	_, isTimeMode := m.Mode.(*modes.TimeMode)
+
+	if !isTimeMode {
 		optionalTime := FormatTime(int(m.Session.EndTime.Sub(m.Session.StartTime).Seconds()))
 		formattedTime = fmt.Sprintf("%s %s", LabelStyle.Render("Time:"), ValueStyle.Render(optionalTime))
 	}
@@ -38,7 +41,7 @@ func (m Model) resultsView() string {
 		Padding(1, 3).
 		Render(statsBox)
 
-	footer := HelpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
+	footer := HelpStyle.Render("[ESC] Quit • [TAB] Restart • [CTRL+P] Command Palette")
 
 	modeSelectorString := ""
 	quoteTypeSelectorString := ""
