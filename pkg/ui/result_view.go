@@ -80,7 +80,6 @@ func (m Model) resultsView() string {
 		Padding(1, 2).
 		Render(styledChart)
 
-	// ── left column: header + stats ──
 	leftColumn := lipgloss.JoinVertical(lipgloss.Center,
 		header,
 		"",
@@ -88,18 +87,15 @@ func (m Model) resultsView() string {
 		secondaryStats,
 	)
 
-	// align left column height to chart
 	chartH := lipgloss.Height(chartContainer)
 	leftColumn = lipgloss.NewStyle().
 		Height(chartH).
 		Align(lipgloss.Center, lipgloss.Center).
 		Render(leftColumn)
 
-	// ── main row: left + chart ──
 	gap := lipgloss.NewStyle().Width(4).Render("")
 	mainRow := lipgloss.JoinHorizontal(lipgloss.Center, leftColumn, gap, chartContainer)
 
-	// ── footer ──
 	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
 	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
 
@@ -111,7 +107,6 @@ func (m Model) resultsView() string {
 		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 	)
 
-	// ── selectors ──
 	modeSelectorString := ""
 	quoteTypeSelectorString := ""
 
@@ -123,7 +118,6 @@ func (m Model) resultsView() string {
 		quoteTypeSelectorString = getSeletorString(m.CurrentSelector.GetChoices(), m.CurrentSelector.GetCursor())
 	}
 
-	// ── assemble ──
 	ui := lipgloss.JoinVertical(lipgloss.Center,
 		"",
 		mainRow,
