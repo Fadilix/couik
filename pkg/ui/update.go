@@ -13,14 +13,25 @@ import (
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.TickMsg:
+		if m.State != core.StateTyping {
+			return m, nil
+		}
 		cmd := m.Mode.ProcessTick(&m)
 		return m, cmd
+	case core.TickWpmMsg:
+		if m.State == core.StateTyping && m.Session.Started {
+			wpm := m.Session.CalculateLiveTypingSpeed()
+			m.Session.AddWpmSample(wpm)
+			m.Session.AddTimesSample(time.Time(msg))
+			return m, core.WPMTick()
+		}
+		return m, nil
 
 	case tea.WindowSizeMsg:
 		m.TerminalWidth = msg.Width
 		m.TerminalHeight = msg.Height
 
-		m.ProgressBar.Width = msg.Width - 20
+		m.ProgressBar.Width = min(msg.Width-20, 45)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -135,11 +146,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Track if we need to start the timer
 			_, isTimeMode := m.Mode.(*modes.TimeMode)
-			var startTimer bool
+			wasStarted := m.Session.Started
 
 			if !m.Active && isTimeMode {
 				m.Active = true
-				startTimer = true
 			}
 
 			if m.Session.Index < len(m.Session.Target) {
@@ -148,6 +158,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if m.Session.IsFinished() {
 				m.State = core.StateResults
+				m.Session.Started = false
+				m.Active = false
+				m.CachedChart = DisplayChart(m.Session.WpmSamples, m.Session.TimesSample, min(max(m.TerminalWidth/3, 20), 40), 10)
 				result := database.TestResult{
 					RawWPM:   m.Session.CalculateRawTypingSpeed(),
 					WPM:      m.Session.CalculateTypingSpeed(),
@@ -159,9 +172,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Repo.Save(result)
 			}
 
-			// Start the timer if needed
-			if startTimer {
-				return m, core.Tick()
+			// Start the timers if just started
+			var cmds []tea.Cmd
+			if !wasStarted && m.Session.Started {
+				cmds = append(cmds, core.WPMTick())
+				if isTimeMode {
+					cmds = append(cmds, core.Tick())
+				}
+			}
+
+			if len(cmds) > 0 {
+				return m, tea.Batch(cmds...)
 			}
 		}
 	}

@@ -40,3 +40,11 @@ func Tick() tea.Cmd {
 		return TickMsg(t)
 	})
 }
+
+type TickWpmMsg time.Time
+
+func WPMTick() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return TickWpmMsg(t)
+	})
+}

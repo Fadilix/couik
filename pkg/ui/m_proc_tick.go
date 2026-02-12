@@ -30,3 +30,12 @@ func (m *Model) GetSession() *engine.Session {
 func (m *Model) IsActive() bool {
 	return m.Active
 }
+
+func (m *Model) GetTerminalWidth() int {
+	return m.TerminalWidth
+}
+
+func (m *Model) CacheChart() {
+	width := min(max(m.TerminalWidth/3, 20), 40)
+	m.CachedChart = DisplayChart(m.Session.WpmSamples, m.Session.TimesSample, width, 10)
+}

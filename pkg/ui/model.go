@@ -17,18 +17,6 @@ import (
 	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
-// Typing mode
-// type TypingMode int
-
-// const (
-// 	unselectedMode TypingMode = iota
-// 	timedMode
-// 	quoteMode
-// 	wordMode
-// )
-
-// Quote mode (small, mid, thicc)
-
 type Model struct {
 	Session        *engine.Session
 	Repo           storage.HistoryRepository
@@ -37,36 +25,30 @@ type Model struct {
 	TerminalWidth  int
 	TerminalHeight int
 
-	// mode selecting
 	CurrentSelector components.Selector
 
-	// for mode selecting
 	IsSelectingMode bool
-	// Cursor          int
-	// Choices         []string
-	Mode modes.ModeStrategy
+	Mode            modes.ModeStrategy
 
-	// state
 	State core.SessionState
 
-	// timer
 	TimeLeft    int
 	initialTime int // Store the initial time duration for progress calculation
 	Active      bool
 
 	// quote mode selection
-	QuoteType database.QuoteCategory
-	// QuoteTypeCursor      int
-	// QuoteTypeChoices     []string
+	QuoteType            database.QuoteCategory
 	IsSelectingQuoteType bool
 
 	// words
 	InitialWords int
 
-	// User defaults
-	// config cli.Config
+	// Cached config or use default
 	CustomDashboard string
 	CurrentLanguage database.Language
+
+	// Cached chart for results view (prevents re-rendering shifts)
+	CachedChart string
 }
 
 func NewModel(target string) Model {
@@ -79,15 +61,11 @@ func NewModel(target string) Model {
 	p.Empty = '─'
 
 	typingModes := []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}
-	// qType := []string{"small", "mid", "thicc"}
-
-	// default typing mode
 
 	defaultQT := database.Mid
 	defaultInitTime := 30
 	defaultDashboard := ""
 
-	// load the user config
 	config := cli.GetConfig()
 
 	if database.FileExists(config.DashboardASCII) {
@@ -108,8 +86,6 @@ func NewModel(target string) Model {
 		}
 	}
 
-	// defaultTMode := modes.NewQuoteMode()
-
 	modeConfigContext := &core.ModeConfig{
 		Target:       target,
 		InitialWords: 50,
@@ -126,7 +102,7 @@ func NewModel(target string) Model {
 		ProgressBar:     p,
 		TimeLeft:        currentTime,
 		initialTime:     currentTime,
-		Mode:            defaultTMode, // Default to quote mode since we start with a random quote
+		Mode:            defaultTMode, // Default to quote mode
 		QuoteType:       defaultQT,    // default to mid
 		InitialWords:    50,
 		CustomDashboard: defaultDashboard,

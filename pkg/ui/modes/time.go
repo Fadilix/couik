@@ -66,6 +66,8 @@ func (t TimeMode) ProcessTick(ctx TickContext) tea.Cmd {
 		ctx.Deactivate()
 		ctx.SetState(core.StateResults)
 		ctx.GetSession().EndTime = time.Now()
+		ctx.GetSession().Started = false
+		ctx.CacheChart()
 		return nil
 	}
 
