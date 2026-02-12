@@ -19,8 +19,9 @@ type TimeOption func(*TimeMode)
 
 func NewTimeMode(options ...TimeOption) *TimeMode {
 	tm := &TimeMode{
-		Target:   typing.GetDictionnary(database.English),
-		Language: database.English,
+		Target:      typing.GetDictionnary(database.English),
+		Language:    database.English,
+		InitialTime: 15,
 	}
 
 	for _, option := range options {
@@ -78,6 +79,6 @@ func (t TimeMode) GetConfig() core.ModeConfig {
 	return core.ModeConfig{
 		Target:      t.GetTarget(),
 		Language:    t.Language,
-		InitialTime: t.InitialTime,
+		InitialTime: t.GetInitialTime(),
 	}
 }

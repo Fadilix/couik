@@ -19,6 +19,7 @@ type Stats struct {
 
 func UpdateStats(test database.TestResult) {
 	statsConfig := LoadPRs()
+
 	if test.WPM > statsConfig.BestWPM {
 		statsConfig.BestWPM = test.WPM
 	}
@@ -35,7 +36,7 @@ func UpdateStats(test database.TestResult) {
 
 	file, err := database.GetPath(database.Stats)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error accessing you stats path")
 	}
 
 	newData, err := json.MarshalIndent(statsConfig, "", " ")
@@ -45,7 +46,7 @@ func UpdateStats(test database.TestResult) {
 
 	err = os.WriteFile(file, newData, 0o644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error saving your stats")
 	}
 }
 
