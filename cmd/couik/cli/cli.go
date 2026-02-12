@@ -26,6 +26,7 @@ func Init() {
 
 	ConfigCommand.AddCommand(SetCommand)
 	RootCmd.AddCommand(ConfigCommand)
+	RootCmd.AddCommand(StatsCmd)
 
 	RootCmd.Flags().BoolVarP(&History, "history", "i", false, "Show history")
 	RootCmd.Flags().BoolVarP(&Help, "help", "h", false, "Show help")
