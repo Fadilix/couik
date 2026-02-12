@@ -204,7 +204,7 @@ func (m Model) View() string {
 		"\n",
 		statsRow,
 		bar,
-		lipgloss.NewStyle().Faint(true).Render("Press Esc to quit • [SHIFT + TAB] change mode"),
+		lipgloss.NewStyle().Faint(true).Render("[Esc] Quit • [CTRL+P] Command Palette"),
 		"\n",
 		timer,
 		words,

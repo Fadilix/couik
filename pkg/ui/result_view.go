@@ -41,7 +41,7 @@ func (m Model) resultsView() string {
 		Padding(1, 3).
 		Render(statsBox)
 
-	footer := HelpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
+	footer := HelpStyle.Render("[ESC] Quit • [TAB] Restart • [CTRL+P] Command Palette")
 
 	modeSelectorString := ""
 	quoteTypeSelectorString := ""

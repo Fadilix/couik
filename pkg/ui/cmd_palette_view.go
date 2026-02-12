@@ -14,13 +14,14 @@ type cmdItem struct {
 func (m Model) commandPaletteView() string {
 	cmdPalette := []cmdItem{
 		{"ESC", "Quit"},
-		{"CTRL + R", "Refresh test / return typing)"},
+		{"CTRL + R", "Refresh test/return to typing view"},
 		{"CTRL + L", "Restart the same test"},
 		{"CTRL + E", "Choose quote type"},
 		{"SHIFT + TAB", "Choose typing mode"},
 		{"TAB", "Restart (when on results page)"},
 		{"CTRL + P", "Show this palette"},
 		{"CTRL + N", "Swtich to French/English"},
+		{"CTRL + G", "Show user config"},
 	}
 
 	renderedLogo := dashboardLogo
