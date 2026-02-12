@@ -25,14 +25,18 @@ type fileOption int
 const (
 	Historyy fileOption = iota
 	Config
+	Stats
 )
 
 func GetPath(option fileOption) (string, error) {
 	var filename string
-	if option == Historyy {
+	switch option {
+	case Historyy:
 		filename = "history.json"
-	} else {
+	case Config:
 		filename = "config.yaml"
+	default:
+		filename = "stats.json"
 	}
 
 	configDir, err := os.UserConfigDir()

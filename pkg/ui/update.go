@@ -115,14 +115,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyTab:
 			if m.State == core.StateResults {
 				return m.GetModelFromMode(m), nil
-				// switch m.Mode {
-				// case quoteMode:
-				// 	return m.GetQuoteModel(), nil
-				// case wordMode:
-				// 	return m.GetDictionnaryModelWithWords(m.InitialWords, m.CurrentLanguage), nil
-				// default:
-				// 	return m.GetDictionnaryModel(m.initialTime), nil
-				// }
 			}
 		case tea.KeyCtrlL:
 			if m.State == core.StateResults {
@@ -133,7 +125,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.State = core.StateTyping
 				return m, nil
 			}
-			return m.ApplyMode(m.Mode), nil
+			return m.GetModelFromMode(m), nil
 
 		case tea.KeyRunes, tea.KeySpace:
 			if m.IsSelectingMode {

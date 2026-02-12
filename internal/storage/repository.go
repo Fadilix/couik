@@ -17,6 +17,7 @@ type JSONRepository struct{}
 // Save saves test result to
 // $CONFIG_PATH/couik/history.json
 func (r *JSONRepository) Save(test database.TestResult) error {
+	UpdateStats(test)
 	var history database.History
 	file, err := database.GetPath(database.Historyy)
 	if err != nil {
