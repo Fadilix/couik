@@ -29,6 +29,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.CurrentSelector.Increment()
 		case "h", "left":
 			m.CurrentSelector.Decrement()
+		case "ctrl+n":
+			if m.CurrentLanguage == database.English {
+				m.CurrentLanguage = database.French
+			} else {
+				m.CurrentLanguage = database.English
+			}
+
+			cfg := m.Mode.GetConfig()
+
+			if cfg.InitialWords > 0 {
+				return m.GetDictionnaryModelWithWords(cfg.InitialWords, m.CurrentLanguage), nil
+			}
+
+			if cfg.InitialTime > 0 {
+				return m.GetDictionnaryModel(cfg.InitialTime), nil
+			}
+
+			return m.ApplyMode(modes.NewQuoteMode(
+				modes.WithCategoryQ(cfg.Category),
+				modes.WithLanguageQ(m.CurrentLanguage),
+			)), nil
 
 		case "enter":
 			if m.IsSelectingMode {
