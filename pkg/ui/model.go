@@ -157,30 +157,38 @@ func (m Model) GetDictionnaryModelWithWords(words int, language database.Languag
 	return newModel
 }
 
+type ApplyModelOption func(*Model)
+
+func WithSameQuote(target string) ApplyModelOption {
+	return func(m *Model) {
+		m.Session.Target = []rune(target)
+	}
+}
+
 // ApplyMode creates a new Model instance configured with the given strategy,
 // preserving UI state from the current model
-func (m Model) ApplyMode(mode modes.ModeStrategy) Model {
+func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) Model {
 	config := mode.GetConfig()
 
-	// create base model with target
 	newModel := NewModel(config.Target)
 
-	// apply mode strategy nd config
 	newModel.Mode = mode
 	newModel.CurrentLanguage = config.Language
 	newModel.InitialWords = config.InitialWords
 	newModel.QuoteType = config.Category
 
-	// set time logic correctly
 	newModel.TimeLeft = config.InitialTime
 	newModel.initialTime = config.InitialTime
 
-	// preserve ui state
 	newModel.TerminalWidth = m.TerminalWidth
 	newModel.TerminalHeight = m.TerminalHeight
 	newModel.ProgressBar = m.ProgressBar
 	newModel.Repo = m.Repo
 	newModel.CustomDashboard = m.CustomDashboard
+
+	for _, option := range options {
+		option(&newModel)
+	}
 
 	return newModel
 }
@@ -205,19 +213,16 @@ func (m *Model) GetModelFromMode(mod Model) Model {
 // CreateModeFromSelection parses the selection string and returns the appropriate ModeStrategy.
 // It handles dynamic cases like "15s", "words 10"
 func CreateModeFromSelection(selection string, lang database.Language) modes.ModeStrategy {
-	// Time Mode
 	if strings.HasSuffix(selection, "s") {
 		seconds, _ := strconv.Atoi(strings.TrimSuffix(selection, "s"))
 		return modes.NewTimeMode(modes.WithInitialTimeT(seconds), modes.WithLanguageT(lang))
 	}
 
-	// Word Mode
 	if strings.HasPrefix(selection, "words ") {
 		count, _ := strconv.Atoi(strings.TrimPrefix(selection, "words "))
 		return modes.NewWordMode(modes.WithInitialWords(count), modes.WithLanguageW(lang))
 	}
 
-	// Quote Mode
 	if selection == "quote" {
 		return modes.NewQuoteMode(modes.WithLanguageQ(lang))
 	}

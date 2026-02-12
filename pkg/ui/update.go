@@ -126,7 +126,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case tea.KeyCtrlL:
 			if m.State == core.StateResults {
-				return m.ApplyMode(m.Mode), nil
+				return m.ApplyMode(m.Mode, WithSameQuote(string(m.Session.Target))), nil
 			}
 		case tea.KeyCtrlR:
 			if m.State == core.StateCommandPalette || m.State == core.StateConfig {
