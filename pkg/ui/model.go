@@ -49,6 +49,9 @@ type Model struct {
 
 	// Cached chart for results view (prevents re-rendering shifts)
 	CachedChart string
+
+	// PR stats config
+	PRs storage.Stats
 }
 
 func NewModel(target string) Model {
@@ -97,6 +100,8 @@ func NewModel(target string) Model {
 
 	currentTime := defaultTMode.GetInitialTime()
 
+	loadedPrs := storage.LoadPRs()
+
 	return Model{
 		Session:         engine.NewSession(target),
 		ProgressBar:     p,
@@ -108,6 +113,7 @@ func NewModel(target string) Model {
 		CustomDashboard: defaultDashboard,
 		Repo:            &storage.JSONRepository{},
 		CurrentSelector: components.NewModeSelector(),
+		PRs:             loadedPrs,
 	}
 }
 

@@ -18,8 +18,8 @@ var StatsCmd = &cobra.Command{
 }
 
 func DisplayStats() {
-	fmt.Println("Personal best")
-	pb := storage.GetBestStats()
+	fmt.Println("Couik Personal best")
+	pb := storage.LoadPRs()
 
 	fmt.Printf("PB WPM: %.2f\n", pb.BestWPM)
 	fmt.Printf("Lastest test: %s\n", pb.LastTestDate.Format("02 Jan 2006"))

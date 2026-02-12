@@ -18,7 +18,9 @@ func (m Model) resultsView() string {
 
 	_, isTimeMode := m.Mode.(*modes.TimeMode)
 
-	wpmVal := fmt.Sprintf("%.0f", m.Session.CalculateTypingSpeed())
+	sessionSpeed := m.Session.CalculateTypingSpeed()
+
+	wpmVal := fmt.Sprintf("%.0f", sessionSpeed)
 	rawVal := fmt.Sprintf("%.0f", m.Session.CalculateRawTypingSpeed())
 	accVal := fmt.Sprintf("%.1f%%", m.Session.CalculateAccuracy())
 
@@ -31,10 +33,19 @@ func (m Model) resultsView() string {
 		Foreground(CatSubtext).
 		Render("wpm")
 
+	var NewPr string
+
+	if sessionSpeed > m.PRs.BestWPM {
+		NewPr = lipgloss.NewStyle().
+			Foreground(CatMauve).
+			Bold(true).
+			Render(" (New PR 󰈸) ")
+	}
+
 	heroCard := lipgloss.NewStyle().
 		Padding(1, 4).
 		Align(lipgloss.Center).
-		Render(lipgloss.JoinVertical(lipgloss.Center, heroValue, heroLabel))
+		Render(lipgloss.JoinVertical(lipgloss.Center, heroValue, heroLabel, NewPr))
 
 	statLabel := lipgloss.NewStyle().Foreground(CatOverlay)
 	statValue := lipgloss.NewStyle().Foreground(CatText).Bold(true)

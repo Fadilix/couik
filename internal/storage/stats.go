@@ -18,7 +18,7 @@ type Stats struct {
 }
 
 func UpdateStats(test database.TestResult) {
-	statsConfig := GetBestStats()
+	statsConfig := LoadPRs()
 	if test.WPM > statsConfig.BestWPM {
 		statsConfig.BestWPM = test.WPM
 	}
@@ -49,7 +49,7 @@ func UpdateStats(test database.TestResult) {
 	}
 }
 
-func GetBestStats() Stats {
+func LoadPRs() Stats {
 	var statsConfig Stats
 	file, err := database.GetPath(database.Stats)
 	if err != nil {
