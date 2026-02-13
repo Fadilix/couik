@@ -18,6 +18,7 @@ var (
 	File    string
 	Text    string
 	SetHelp bool
+	Lang    string
 )
 
 func Init() {
@@ -25,6 +26,7 @@ func Init() {
 
 	ConfigCommand.AddCommand(SetCommand)
 	RootCmd.AddCommand(ConfigCommand)
+	RootCmd.AddCommand(StatsCmd)
 
 	RootCmd.Flags().BoolVarP(&History, "history", "i", false, "Show history")
 	RootCmd.Flags().BoolVarP(&Help, "help", "h", false, "Show help")
@@ -32,4 +34,5 @@ func Init() {
 	RootCmd.Flags().IntVarP(&Words, "words", "w", 0, "Launch typing test with specified number of words")
 	RootCmd.Flags().StringVarP(&File, "file", "f", "", "Launch a typing test with a custom text in a file")
 	RootCmd.Flags().StringVarP(&Text, "custom", "c", "", "Launch a typing test with a custom text")
+	RootCmd.Flags().StringVarP(&Lang, "lang", "l", "", "Launch a typing test a specific language")
 }

@@ -11,6 +11,8 @@ type Session struct {
 	BackSpaceCount int
 	IsError        bool
 	Started        bool
+	WpmSamples     []float64
+	TimesSample    []time.Time
 }
 
 func NewSession(target string) *Session {
@@ -57,6 +59,22 @@ func (s *Session) CalculateTypingSpeed() float64 {
 	return (float64(correctChars) / 5.0) / duration.Minutes()
 }
 
+func (s *Session) CalculateLiveTypingSpeed() float64 {
+	duration := time.Since(s.StartTime)
+	if duration.Minutes() == 0 {
+		return 0
+	}
+
+	correctChars := 0
+	for _, r := range s.Results[:s.Index] {
+		if r {
+			correctChars++
+		}
+	}
+
+	return (float64(correctChars) / 5.0) / duration.Minutes()
+}
+
 func (s *Session) CalculateRawTypingSpeed() float64 {
 	duration := s.EndTime.Sub(s.StartTime)
 
@@ -92,4 +110,12 @@ func (s *Session) CalculateAccuracy() float64 {
 func (s *Session) IsFinished() bool {
 	s.EndTime = time.Now()
 	return s.Index >= len(s.Target)
+}
+
+func (s *Session) AddWpmSample(sample float64) {
+	s.WpmSamples = append(s.WpmSamples, sample)
+}
+
+func (s *Session) AddTimesSample(timeSample time.Time) {
+	s.TimesSample = append(s.TimesSample, timeSample)
 }

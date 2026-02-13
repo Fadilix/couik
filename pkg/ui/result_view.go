@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
 func (m Model) resultsView() string {
@@ -13,32 +14,109 @@ func (m Model) resultsView() string {
 		renderedLogo = m.CustomDashboard
 	}
 
-	// Logo Section
 	header := ViewHeaderStyle.Render(renderedLogo)
 
-	var formattedTime string
-	if m.Mode != timedMode {
-		optionalTime := FormatTime(int(m.Session.EndTime.Sub(m.Session.StartTime).Seconds()))
-		formattedTime = fmt.Sprintf("%s %s", LabelStyle.Render("Time:"), ValueStyle.Render(optionalTime))
+	_, isTimeMode := m.Mode.(*modes.TimeMode)
+
+	sessionSpeed := m.Session.CalculateTypingSpeed()
+
+	wpmVal := fmt.Sprintf("%.0f", sessionSpeed)
+	rawVal := fmt.Sprintf("%.0f", m.Session.CalculateRawTypingSpeed())
+	accVal := fmt.Sprintf("%.1f%%", m.Session.CalculateAccuracy())
+
+	heroValue := lipgloss.NewStyle().
+		Foreground(CatMauve).
+		Bold(true).
+		Render(wpmVal)
+
+	heroLabel := lipgloss.NewStyle().
+		Foreground(CatSubtext).
+		Render("wpm")
+
+	var NewPr string
+
+	if sessionSpeed > m.PRs.BestWPM {
+		NewPr = lipgloss.NewStyle().
+			Foreground(CatMauve).
+			Bold(true).
+			Render(" (New PR 󰈸) ")
 	}
 
-	// Build the stats block
-	statsBox := lipgloss.JoinVertical(lipgloss.Left,
-		StatsTitleStyle.Render("SESSION PERFORMANCE"),
-		fmt.Sprintf("%s %s", LabelStyle.Render("Speed:"), ValueStyle.Render(fmt.Sprintf("%.2f WPM", m.Session.CalculateTypingSpeed()))),
-		fmt.Sprintf("%s %s", LabelStyle.Render("Raw Speed:"), ValueStyle.Render(fmt.Sprintf("%.2f WPM", m.Session.CalculateRawTypingSpeed()))),
-		fmt.Sprintf("%s %s", LabelStyle.Render("Accuracy:"), ValueStyle.Render(fmt.Sprintf("%.2f%%", m.Session.CalculateAccuracy()))),
-		formattedTime,
+	heroCard := lipgloss.NewStyle().
+		Padding(1, 4).
+		Align(lipgloss.Center).
+		Render(lipgloss.JoinVertical(lipgloss.Center, heroValue, heroLabel, NewPr))
+
+	statLabel := lipgloss.NewStyle().Foreground(CatOverlay)
+	statValue := lipgloss.NewStyle().Foreground(CatText).Bold(true)
+	statDivider := lipgloss.NewStyle().Foreground(CatSurface).Render("  │  ")
+
+	secondaryStats := lipgloss.JoinHorizontal(lipgloss.Center,
+		lipgloss.JoinVertical(lipgloss.Center, statValue.Render(rawVal), statLabel.Render("raw")),
+		statDivider,
+		lipgloss.JoinVertical(lipgloss.Center, statValue.Render(accVal), statLabel.Render("acc")),
 	)
 
-	// Wrap stats in a subtle border or padding
-	styledStats := lipgloss.NewStyle().
+	if !isTimeMode {
+		durSeconds := int(m.Session.EndTime.Sub(m.Session.StartTime).Seconds())
+		durVal := fmt.Sprintf("%ds", durSeconds)
+		secondaryStats = lipgloss.JoinHorizontal(lipgloss.Center,
+			secondaryStats,
+			statDivider,
+			lipgloss.JoinVertical(lipgloss.Center, statValue.Render(durVal), statLabel.Render("time")),
+		)
+	}
+
+	chartWidth := 40
+	chartHeight := 12
+
+	chartView := m.CachedChart
+	if chartView == "" {
+		chartView = DisplayChart(m.Session.WpmSamples, m.Session.TimesSample, chartWidth, chartHeight)
+	}
+
+	chartTitle := lipgloss.NewStyle().
+		Foreground(CatSubtext).
+		Render("wpm over time")
+
+	styledChart := lipgloss.JoinVertical(lipgloss.Center,
+		chartTitle,
+		"",
+		chartView,
+	)
+
+	chartContainer := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(CatSurface).
-		Padding(1, 3).
-		Render(statsBox)
+		Padding(1, 2).
+		Render(styledChart)
 
-	footer := HelpStyle.Render("[TAB] restart • [CTRL + L] restart same • [SHIFT + TAB] change mode • [ESC] quit")
+	leftColumn := lipgloss.JoinVertical(lipgloss.Center,
+		header,
+		"",
+		heroCard,
+		secondaryStats,
+	)
+
+	chartH := lipgloss.Height(chartContainer)
+	leftColumn = lipgloss.NewStyle().
+		Height(chartH).
+		Align(lipgloss.Center, lipgloss.Center).
+		Render(leftColumn)
+
+	gap := lipgloss.NewStyle().Width(4).Render("")
+	mainRow := lipgloss.JoinHorizontal(lipgloss.Center, leftColumn, gap, chartContainer)
+
+	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
+	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
+
+	footer := lipgloss.JoinHorizontal(lipgloss.Center,
+		footerKey.Render("esc "), footerDesc.Render("quit"),
+		footerDesc.Render("  •  "),
+		footerKey.Render("tab "), footerDesc.Render("restart"),
+		footerDesc.Render("  •  "),
+		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
+	)
 
 	modeSelectorString := ""
 	quoteTypeSelectorString := ""
@@ -51,14 +129,11 @@ func (m Model) resultsView() string {
 		quoteTypeSelectorString = getSeletorString(m.CurrentSelector.GetChoices(), m.CurrentSelector.GetCursor())
 	}
 
-	// Final Assembly
 	ui := lipgloss.JoinVertical(lipgloss.Center,
-		header,
-		"\n",
-		styledStats,
-		"\n",
+		"",
+		mainRow,
+		"",
 		footer,
-		"\n",
 		modeSelectorString,
 		quoteTypeSelectorString,
 	)

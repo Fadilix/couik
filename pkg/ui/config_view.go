@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"fmt"
-
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fadilix/couik/cmd/couik/cli"
 )
@@ -18,17 +16,35 @@ func (m Model) configView() string {
 
 	header := ViewHeaderStyle.Render(renderedLogo)
 
-	lines := []string{}
-	lines = append(lines, header, "\n")
+	keyStyle := lipgloss.NewStyle().Foreground(CatLavender).Bold(true).Width(15).Align(lipgloss.Left)
+	valStyle := lipgloss.NewStyle().Foreground(CatText).Width(20).Align(lipgloss.Left)
+	divider := lipgloss.NewStyle().Foreground(CatSurface).Render(" │ ")
 
-	mode := fmt.Sprintf("%s %s\n", LabelStyle.Render("Mode"), ValueStyle.Render(config.Mode))
-	dashASCII := fmt.Sprintf("%s %s\n", LabelStyle.Render("DashASCII"), ValueStyle.Render(config.DashboardASCII))
-	quoteT := fmt.Sprintf("%s %s\n", LabelStyle.Render("Quote Type"), ValueStyle.Render(config.QuoteType))
-	time := fmt.Sprintf("%s %s\n", LabelStyle.Render("Time"), ValueStyle.Render(config.Time))
+	items := []struct{ k, v string }{
+		{"Mode", config.Mode},
+		{"DashASCII", config.DashboardASCII},
+		{"Quote Type", config.QuoteType},
+		{"Time", config.Time},
+	}
 
-	footer := HelpStyle.Render("[CTRL + R] return typing • [ESC] quit")
+	lines := []string{header, ""}
+	for _, item := range items {
+		row := lipgloss.JoinHorizontal(lipgloss.Center,
+			keyStyle.Render(item.k),
+			divider,
+			valStyle.Render(item.v),
+		)
+		lines = append(lines, row)
+	}
 
-	lines = append(lines, mode, dashASCII, quoteT, time, footer)
+	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
+	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
+	footer := lipgloss.JoinHorizontal(lipgloss.Center,
+		footerKey.Render("ctrl+r "), footerDesc.Render("back"),
+		footerDesc.Render("  •  "),
+		footerKey.Render("esc "), footerDesc.Render("quit"),
+	)
+	lines = append(lines, "", footer)
 
 	mui := lipgloss.JoinVertical(lipgloss.Center, lines...)
 

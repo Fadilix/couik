@@ -7,20 +7,23 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fadilix/couik/pkg/typing/stats"
+	"github.com/fadilix/couik/pkg/ui/core"
+	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
 var dashboardLogo string = CouikASCII3
 
 func (m Model) View() string {
-	if m.State == stateResults || m.timeLeft <= 0 {
+	_, isTimeMode := m.Mode.(*modes.TimeMode)
+	if m.State == core.StateResults || (isTimeMode && m.TimeLeft <= 0) {
 		return m.resultsView()
 	}
 
-	if m.State == stateCommandPalette {
+	if m.State == core.StateCommandPalette {
 		return m.commandPaletteView()
 	}
 
-	if m.State == stateConfig {
+	if m.State == core.StateConfig {
 		return m.configView()
 	}
 
@@ -128,15 +131,18 @@ func (m Model) View() string {
 		liveAcc, _ = stats.CalculateAccuracy(correctCount, m.Session.Index, m.Session.BackSpaceCount)
 	}
 
-	wpmDisplay := StatsStyle.Render(fmt.Sprintf("WPM: %.2f", liveWpm))
-	accDisplay := StatsStyle.Render(fmt.Sprintf("ACC: %.2f%%", liveAcc))
-	statsRow := lipgloss.JoinHorizontal(lipgloss.Top, wpmDisplay, accDisplay)
+	wpmDisplay := StatsStyle.Render(fmt.Sprintf("%.0f wpm", liveWpm))
+	accDisplay := StatsStyle.Render(fmt.Sprintf("%.1f%% acc", liveAcc))
+	statDivider := lipgloss.NewStyle().Foreground(CatSurface).Render(" │ ")
+	statsRow := lipgloss.JoinHorizontal(lipgloss.Center, wpmDisplay, statDivider, accDisplay)
 
 	var percent float64
-	if m.Mode == timedMode && m.initialTime > 0 {
-		percent = float64(m.initialTime-m.timeLeft) / float64(m.initialTime)
-	} else {
+	if isTimeMode && m.initialTime > 0 {
+		percent = float64(m.initialTime-m.TimeLeft) / float64(m.initialTime)
+	} else if len(m.Session.Target) > 0 {
 		percent = float64(m.Session.Index) / float64(len(m.Session.Target))
+	} else {
+		percent = 0
 	}
 	bar := m.ProgressBar.ViewAs(percent)
 
@@ -178,10 +184,12 @@ func (m Model) View() string {
 
 	timer := ""
 	words := ""
-	if m.Mode == timedMode {
-		timer = fmt.Sprintf("%d\n", m.timeLeft)
+	// _, isTimeMode := m.Mode.(*modes.TimeMode)
+
+	if isTimeMode {
+		timer = lipgloss.NewStyle().Foreground(CatText).Bold(true).Render(fmt.Sprintf("%d", m.TimeLeft))
 	} else {
-		words = fmt.Sprintf("%d/%d\n", m.Session.Index, len(string(m.Session.Target)))
+		words = lipgloss.NewStyle().Foreground(CatOverlay).Render(fmt.Sprintf("%d/%d", m.Session.Index, len(string(m.Session.Target))))
 	}
 
 	renderedLogo := dashboardLogo
@@ -190,15 +198,29 @@ func (m Model) View() string {
 		renderedLogo = m.CustomDashboard
 	}
 
+	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
+	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
+
+	footerText := lipgloss.JoinHorizontal(lipgloss.Center,
+		footerKey.Render("esc "), footerDesc.Render("quit"),
+		footerDesc.Render("  •  "),
+		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
+	)
+
 	content := lipgloss.JoinVertical(lipgloss.Center,
 		HeaderStyle.Render(renderedLogo),
-		"\n",
+		"",
+		"",
 		wrappedText,
-		"\n",
+		"",
+		"",
 		statsRow,
+		"",
 		bar,
-		lipgloss.NewStyle().Faint(true).Render("Press Esc to quit • [SHIFT + TAB] change mode"),
-		"\n",
+		"",
+		"",
+		footerText,
+		"",
 		timer,
 		words,
 		modeSelectorString,

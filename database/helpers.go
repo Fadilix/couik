@@ -1,16 +1,16 @@
 package database
 
-type Category int
+type QuoteCategory int
 
 const (
-	Small Category = iota
+	Small QuoteCategory = iota
 	Mid
 	Thicc
 )
 
 // GetQuotes loads quotes the embedded data and returns
 // a list of quotes according to the language and category
-func GetQuotes(lang Language, category Category) []Quote {
+func GetQuotes(lang Language, category QuoteCategory) []Quote {
 	var maxLength int
 	var minLength int
 

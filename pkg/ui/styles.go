@@ -37,46 +37,35 @@ var (
 			Underline(true).
 			Bold(true)
 
-	// Your WPM/ACC display (Vibrant Sapphire)
+	// Live stats during typing (minimal, no border)
 	StatsStyle = lipgloss.NewStyle().
-			Foreground(CatSapphire).
-			Bold(true).
-			Padding(0, 1).
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(CatSurface)
+			Foreground(CatOverlay).
+			Padding(0, 1)
 
-	HeaderStyle = lipgloss.NewStyle().Foreground(CatLavender)
+	HeaderStyle = lipgloss.NewStyle().Foreground(CatMauve)
 
 	// Mode selector styles
 	ModeActiveStyle = lipgloss.NewStyle().
-			Foreground(CatSurface).
-			Background(CatMauve).
+			Foreground(CatMauve).
 			Bold(true).
-			Padding(0, 2).
+			Padding(0, 1).
 			MarginRight(1)
 
 	ModeInactiveStyle = lipgloss.NewStyle().
-				Foreground(CatSubtext).
-				Background(CatSurface).
-				Padding(0, 2).
+				Foreground(CatOverlay).
+				Padding(0, 1).
 				MarginRight(1)
 
 	ModeSelectorContainerStyle = lipgloss.NewStyle().
-					Border(lipgloss.RoundedBorder()).
-					BorderForeground(CatOverlay).
 					Padding(0, 1).
 					MarginTop(1)
 
 	// for the views
-	// CatMauve
 	ViewHeaderStyle = lipgloss.NewStyle().Foreground(CatMauve).Bold(true)
 
-	// Stats Section - Using a box to make it stand out
-	StatsTitleStyle = lipgloss.NewStyle().Foreground(CatSapphire).Bold(true).MarginBottom(1)
-
-	// Individual stat styling
-	LabelStyle = lipgloss.NewStyle().Foreground(CatMauve).Width(15).Align(lipgloss.Left)
-	ValueStyle = lipgloss.NewStyle().Foreground(CatSubtext).Bold(true).Width(30).Align(lipgloss.Right)
+	// Individual stat styling (command palette & config)
+	LabelStyle = lipgloss.NewStyle().Foreground(CatLavender).Bold(true).Width(15).Align(lipgloss.Left)
+	ValueStyle = lipgloss.NewStyle().Foreground(CatSubtext).Width(30).Align(lipgloss.Right)
 
 	// Footer Section
 	HelpStyle = lipgloss.NewStyle().Foreground(CatOverlay).MarginTop(1)
