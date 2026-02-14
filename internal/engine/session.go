@@ -15,6 +15,10 @@ type Session struct {
 	TimesSample    []time.Time
 }
 
+func (s *Session) Progress() float64 {
+	return float64(s.Index) / float64(len(s.Target))
+}
+
 func NewSession(target string) *Session {
 	targetRune := []rune(target)
 	return &Session{

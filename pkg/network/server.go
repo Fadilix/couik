@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"sync"
 )
@@ -19,8 +20,8 @@ func NewServer() *Server {
 	}
 }
 
-func (s *Server) Start() {
-	listener, err := net.Listen("tcp", ":4217")
+func (s *Server) Start(port string) {
+	listener, err := net.Listen("tcp", ":"+port)
 
 	defer func() {
 		log.Println("server has closed")
@@ -30,7 +31,7 @@ func (s *Server) Start() {
 	}()
 
 	if err != nil {
-		log.Println("Error while listening to port 4217", err)
+		log.Println("Error while listening to port : ", port, err)
 	}
 
 	for {
@@ -53,7 +54,7 @@ func (s *Server) HandleJoin(conn net.Conn) {
 		}
 	}()
 
-	log.Println("A new user entered the chat")
+	slog.Info("A new user entered the chat")
 	s.Mu.Lock()
 	s.Clients[conn] = "randomname"
 	s.Mu.Unlock()
@@ -66,13 +67,29 @@ func (s *Server) HandleJoin(conn net.Conn) {
 			log.Println("Client disconnected on error", err)
 			break
 		}
-		s.HandleMessage(msg)
+		s.HandleMessage(conn, msg)
 	}
 }
 
-func (s *Server) HandleMessage(msg Message) {
+func (s *Server) HandleMessage(sender net.Conn, msg Message) {
 	switch msg.Type {
 	case MsgJoin:
+		var payload JoinPayload
+		if err := json.Unmarshal(msg.Payload, &payload); err == nil {
+			s.Mu.Lock()
+			s.Clients[sender] = payload.PlayerName
+
+			for conn, name := range s.Clients {
+				if conn == sender {
+					continue
+				}
+				p, _ := json.Marshal(JoinPayload{PlayerName: name})
+				m := Message{Type: MsgJoin, Payload: p}
+				data, _ := json.Marshal(m)
+				fmt.Fprintln(sender, string(data))
+			}
+			s.Mu.Unlock()
+		}
 		s.Broadcast(msg)
 	case MsgStart:
 		s.Broadcast(msg)

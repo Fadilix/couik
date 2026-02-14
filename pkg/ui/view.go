@@ -225,6 +225,7 @@ func (m Model) View() string {
 		words,
 		modeSelectorString,
 		quoteTypeSelectorString,
+		m.PlayersView(),
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, content)

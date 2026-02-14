@@ -1,10 +1,13 @@
 package ui
 
 import (
+	"encoding/json"
+	"log"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
+	"github.com/fadilix/couik/pkg/network"
 	"github.com/fadilix/couik/pkg/ui/components"
 	"github.com/fadilix/couik/pkg/ui/core"
 	"github.com/fadilix/couik/pkg/ui/modes"
@@ -20,6 +23,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case core.TickWpmMsg:
 		if m.State == core.StateTyping && m.Session.Started {
+			if m.Multiplayer {
+				go m.Client.SendUpdate(m.PlayerName, int(m.Session.CalculateLiveTypingSpeed()), m.Session.Progress())
+			}
+
 			wpm := m.Session.CalculateLiveTypingSpeed()
 			m.Session.AddWpmSample(wpm)
 			m.Session.AddTimesSample(time.Time(msg))
@@ -27,6 +34,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case network.Message:
+		switch msg.Type {
+		case network.MsgJoin:
+			defer WaitForNetworkMsg(m.Client)
+			var joinPayload network.JoinPayload
+
+			err := json.Unmarshal(msg.Payload, &joinPayload)
+			if err != nil {
+				log.Println(err)
+			}
+
+			m.Mu.Lock()
+			// slog.Warn("new user joined")
+			m.Players[joinPayload.PlayerName] = &network.UpdatePayload{
+				PlayerName: joinPayload.PlayerName,
+				WPM:        0,
+				Progress:   0,
+			}
+			m.Mu.Unlock()
+		}
 	case tea.WindowSizeMsg:
 		m.TerminalWidth = msg.Width
 		m.TerminalHeight = msg.Height

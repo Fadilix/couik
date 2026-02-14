@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,6 +12,7 @@ import (
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/internal/engine"
 	"github.com/fadilix/couik/internal/storage"
+	"github.com/fadilix/couik/pkg/network"
 	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui/components"
 	"github.com/fadilix/couik/pkg/ui/core"
@@ -52,6 +54,13 @@ type Model struct {
 
 	// PR stats config
 	PRs storage.Stats
+
+	Client *network.Client
+	// multiplayer
+	Multiplayer bool
+	PlayerName  string
+	Mu          *sync.Mutex
+	Players     map[string]*network.UpdatePayload
 }
 
 func NewModel(target string) Model {
@@ -114,10 +123,15 @@ func NewModel(target string) Model {
 		Repo:            &storage.JSONRepository{},
 		CurrentSelector: components.NewModeSelector(),
 		PRs:             loadedPrs,
+		Players:         make(map[string]*network.UpdatePayload),
+		Mu:              &sync.Mutex{},
 	}
 }
 
 func (m Model) Init() tea.Cmd {
+	if m.Multiplayer && m.Client != nil {
+		return WaitForNetworkMsg(m.Client)
+	}
 	return nil
 }
 
@@ -138,8 +152,9 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 
 // GetDictionnaryModelWithWords creates a model with custom words length
 // for word mode typing tests
+var newTarget strings.Builder
+
 func (m Model) GetDictionnaryModelWithWords(words int, language database.Language) Model {
-	var newTarget strings.Builder
 	dictionnary := typing.GetDictionnary(language)
 
 	wordCount := 0
@@ -234,4 +249,10 @@ func CreateModeFromSelection(selection string, lang database.Language) modes.Mod
 	}
 
 	return nil
+}
+
+func WaitForNetworkMsg(c *network.Client) tea.Cmd {
+	return func() tea.Msg {
+		return <-c.NextMessage()
+	}
 }

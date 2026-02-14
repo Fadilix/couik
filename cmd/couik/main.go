@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"slices"
+	"strconv"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/cmd/couik/cli"
 	"github.com/fadilix/couik/database"
+	"github.com/fadilix/couik/pkg/network"
 	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui"
 )
@@ -70,6 +74,58 @@ func main() {
 	} else if cli.Text != "" {
 		target = cli.Text
 		m = ui.NewModel(target)
+	}
+
+	if cli.Host != 4217 {
+		server := network.NewServer()
+		go server.Start(strconv.Itoa(cli.Host))
+
+		time.Sleep(100 * time.Millisecond)
+
+		client, err := network.NewClient("localhost:" + strconv.Itoa(cli.Host))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		m.Multiplayer = true
+		m.PlayerName = "Host"
+
+		err = client.SendJoin("Host")
+		m.Client = client
+		// m.Mu.Lock()
+		// m.Oponents["host"] = &network.UpdatePayload{
+		// 	PlayerName: "host",
+		// 	Progress:   0,
+		// 	WPM:        0,
+		// }
+		// m.Mu.Unlock()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else if cli.Join != "" {
+		client, err := network.NewClient(cli.Join)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		m.Client = client
+
+		m.Multiplayer = true
+		m.PlayerName = "Guest"
+		// m.Mu.Lock()
+		// m.Oponents["guest"] = &network.UpdatePayload{
+		// 	PlayerName: "guest",
+		// 	Progress:   0,
+		// 	WPM:        0,
+		// }
+		// m.Mu.Unlock()
+
+		err = client.SendJoin("Guest")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	}
 
 	p := tea.NewProgram(m)
