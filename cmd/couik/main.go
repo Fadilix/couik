@@ -88,17 +88,18 @@ func main() {
 		}
 
 		m.Multiplayer = true
-		m.PlayerName = "Host"
+		playerName := "Host"
+		if cli.Name != "" {
+			playerName = cli.Name
+		} else {
+			fmt.Println("You should provide a name to play multiplayer (add use --name to your command)")
+			os.Exit(0)
+		}
+		m.PlayerName = playerName
 
-		err = client.SendJoin("Host")
+		err = client.SendJoin(playerName)
 		m.Client = client
-		// m.Mu.Lock()
-		// m.Oponents["host"] = &network.UpdatePayload{
-		// 	PlayerName: "host",
-		// 	Progress:   0,
-		// 	WPM:        0,
-		// }
-		// m.Mu.Unlock()
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -112,16 +113,16 @@ func main() {
 		m.Client = client
 
 		m.Multiplayer = true
-		m.PlayerName = "Guest"
-		// m.Mu.Lock()
-		// m.Oponents["guest"] = &network.UpdatePayload{
-		// 	PlayerName: "guest",
-		// 	Progress:   0,
-		// 	WPM:        0,
-		// }
-		// m.Mu.Unlock()
+		playerName := "Guest"
+		if cli.Name != "" {
+			playerName = cli.Name
+		} else {
+			fmt.Println("You should provide a name to play multiplayer (add use --name to your command)")
+			os.Exit(0)
+		}
+		m.PlayerName = playerName
 
-		err = client.SendJoin("Guest")
+		err = client.SendJoin(playerName)
 		if err != nil {
 			log.Fatal(err)
 		}
