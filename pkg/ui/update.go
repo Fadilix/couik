@@ -37,23 +37,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case network.Message:
 		switch msg.Type {
 		case network.MsgJoin:
-			defer WaitForNetworkMsg(m.Client)
 			var joinPayload network.JoinPayload
-
-			err := json.Unmarshal(msg.Payload, &joinPayload)
-			if err != nil {
+			if err := json.Unmarshal(msg.Payload, &joinPayload); err != nil {
 				log.Println(err)
+			} else {
+				m.Mu.Lock()
+				m.Players[joinPayload.PlayerName] = &network.UpdatePayload{
+					PlayerName: joinPayload.PlayerName,
+					WPM:        0,
+					Progress:   0,
+				}
+				m.Mu.Unlock()
 			}
 
-			m.Mu.Lock()
-			// slog.Warn("new user joined")
-			m.Players[joinPayload.PlayerName] = &network.UpdatePayload{
-				PlayerName: joinPayload.PlayerName,
-				WPM:        0,
-				Progress:   0,
+		case network.MsgUpdate:
+			var updatePayload network.UpdatePayload
+			if err := json.Unmarshal(msg.Payload, &updatePayload); err != nil {
+				log.Println(err)
+			} else {
+				m.Mu.Lock()
+				m.Players[updatePayload.PlayerName] = &updatePayload
+				m.Mu.Unlock()
 			}
-			m.Mu.Unlock()
 		}
+		return m, WaitForNetworkMsg(m.Client)
 	case tea.WindowSizeMsg:
 		m.TerminalWidth = msg.Width
 		m.TerminalHeight = msg.Height

@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"log/slog"
+	"math/rand"
 	"net"
+	"strconv"
 	"sync"
 )
 
@@ -54,9 +55,9 @@ func (s *Server) HandleJoin(conn net.Conn) {
 		}
 	}()
 
-	slog.Info("A new user entered the chat")
+	// slog.Info("A new user entered the chat")
 	s.Mu.Lock()
-	s.Clients[conn] = "randomname"
+	s.Clients[conn] = "randomname" + strconv.Itoa(rand.Intn(20))
 	s.Mu.Unlock()
 
 	decoder := json.NewDecoder(conn)
