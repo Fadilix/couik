@@ -10,7 +10,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fadilix/couik)](https://github.com/fadilix/couik/releases)
 
 
-<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/683b8898-9d75-48ee-888f-e808a3c738ef" />
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/d8bf2f78-28b2-4988-8806-8f353a0cb6a0" />
 
 
 </div>
