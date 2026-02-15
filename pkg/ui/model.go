@@ -58,6 +58,7 @@ type Model struct {
 	Client *network.Client
 	// multiplayer
 	Multiplayer bool
+	IsHost      bool
 	PlayerName  string
 	Mu          *sync.Mutex
 	Players     map[string]*network.UpdatePayload
@@ -206,6 +207,12 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 	newModel.ProgressBar = m.ProgressBar
 	newModel.Repo = m.Repo
 	newModel.CustomDashboard = m.CustomDashboard
+	newModel.IsHost = m.IsHost
+	newModel.Multiplayer = m.Multiplayer
+	newModel.Client = m.Client
+	newModel.PlayerName = m.PlayerName
+	newModel.Players = m.Players
+	newModel.Mu = m.Mu
 
 	for _, option := range options {
 		option(&newModel)

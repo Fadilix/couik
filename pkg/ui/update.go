@@ -48,7 +48,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					Progress:   0,
 				}
 				m.Mu.Unlock()
+
+				// if m.IsHost {
+				// 	m.Client.SendStart(string(m.Session.Target))
+				// }
 			}
+
+		case network.MsgStart:
+			var startLimit network.StartPayload
+			if err := json.Unmarshal(msg.Payload, &startLimit); err != nil {
+				log.Println(err)
+			}
+			m = m.ApplyMode(modes.NewQuoteMode(modes.WithCustomQuote(startLimit.Text)))
+			return m, WaitForNetworkMsg(m.Client)
 
 		case network.MsgUpdate:
 			var updatePayload network.UpdatePayload
@@ -124,6 +136,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			m.Quitting = true
 			return m, tea.Quit
+		case tea.KeyCtrlJ:
+			if m.IsHost && m.Multiplayer {
+				m.Client.SendStart(string(m.Session.Target))
+			}
 
 		case tea.KeyCtrlE:
 			m.CurrentSelector = components.NewQuoteTypeSelector()
@@ -162,6 +178,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.GetModelFromMode(m), nil
 
 		case tea.KeyRunes, tea.KeySpace:
+			// if m.Ismu
+
 			if m.IsSelectingMode {
 				return m, nil
 			}

@@ -88,11 +88,12 @@ func main() {
 		}
 
 		m.Multiplayer = true
+		m.IsHost = true
 		playerName := "Host"
 		if cli.Name != "" {
 			playerName = cli.Name
 		} else {
-			fmt.Println("You should provide a name to play multiplayer (add use --name to your command)")
+			fmt.Println("You should provide a name to play multiplayer (add --name to your command)")
 			os.Exit(0)
 		}
 		m.PlayerName = playerName
@@ -117,7 +118,7 @@ func main() {
 		if cli.Name != "" {
 			playerName = cli.Name
 		} else {
-			fmt.Println("You should provide a name to play multiplayer (add use --name to your command)")
+			fmt.Println("You should provide a name to play multiplayer (add --name to your command)")
 			os.Exit(0)
 		}
 		m.PlayerName = playerName

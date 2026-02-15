@@ -51,6 +51,14 @@ func (c *Client) Send(m Message) error {
 	return c.enc.Encode(m)
 }
 
+func (c *Client) SendStart(text string) error {
+	payload, _ := json.Marshal(StartPayload{Text: text})
+	return c.Send(Message{
+		Type:    MsgStart,
+		Payload: payload,
+	})
+}
+
 func (c *Client) SendJoin(name string) error {
 	payload, _ := json.Marshal(JoinPayload{PlayerName: name})
 	return c.Send(Message{
