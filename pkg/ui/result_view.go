@@ -110,13 +110,36 @@ func (m Model) resultsView() string {
 	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
 	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
 
+	var multiplayerStats string
+	if m.Multiplayer {
+		multiplayerStats = m.PlayersView()
+	}
+
 	footer := lipgloss.JoinHorizontal(lipgloss.Center,
 		footerKey.Render("esc "), footerDesc.Render("quit"),
 		footerDesc.Render("  •  "),
-		footerKey.Render("tab "), footerDesc.Render("restart"),
-		footerDesc.Render("  •  "),
 		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 	)
+
+	if m.Multiplayer {
+		if m.IsHost {
+			footer = lipgloss.JoinHorizontal(lipgloss.Center,
+				footerKey.Render("esc "), footerDesc.Render("quit"),
+				footerDesc.Render("  •  "),
+				footerKey.Render("ctrl+j "), footerDesc.Render("restart"),
+				footerDesc.Render("  •  "),
+				footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
+			)
+		}
+	} else {
+		footer = lipgloss.JoinHorizontal(lipgloss.Center,
+			footerKey.Render("esc "), footerDesc.Render("quit"),
+			footerDesc.Render("  •  "),
+			footerKey.Render("tab "), footerDesc.Render("restart"),
+			footerDesc.Render("  •  "),
+			footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
+		)
+	}
 
 	modeSelectorString := ""
 	quoteTypeSelectorString := ""
@@ -132,6 +155,8 @@ func (m Model) resultsView() string {
 	ui := lipgloss.JoinVertical(lipgloss.Center,
 		"",
 		mainRow,
+		"",
+		multiplayerStats,
 		"",
 		footer,
 		modeSelectorString,

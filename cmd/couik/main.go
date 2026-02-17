@@ -2,14 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"slices"
+	"strconv"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/cmd/couik/cli"
 	"github.com/fadilix/couik/database"
+	"github.com/fadilix/couik/pkg/network"
 	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui"
+	"github.com/fadilix/couik/pkg/ui/core"
 )
 
 func main() {
@@ -70,6 +75,62 @@ func main() {
 	} else if cli.Text != "" {
 		target = cli.Text
 		m = ui.NewModel(target)
+	}
+
+	if cli.Host != 4217 {
+		server := network.NewServer()
+		go server.Start(strconv.Itoa(cli.Host))
+
+		time.Sleep(100 * time.Millisecond)
+
+		client, err := network.NewClient("localhost:" + strconv.Itoa(cli.Host))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		m.Multiplayer = true
+		m.State = core.StateLobby
+		m.IsHost = true
+		playerName := "Host"
+		if cli.Name != "" {
+			playerName = cli.Name
+		} else {
+			fmt.Println("You should provide a name to play multiplayer (add --name to your command)")
+			os.Exit(0)
+		}
+		m.PlayerName = playerName
+
+		err = client.SendJoin(playerName)
+		m.Client = client
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else if cli.Join != "" {
+		client, err := network.NewClient(cli.Join)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		m.Client = client
+
+		m.Multiplayer = true
+		m.State = core.StateLobby
+		playerName := "Guest"
+		if cli.Name != "" {
+			playerName = cli.Name
+		} else {
+			fmt.Println("You should provide a name to play multiplayer (add --name to your command)")
+			os.Exit(0)
+		}
+		m.PlayerName = playerName
+
+		err = client.SendJoin(playerName)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	}
 
 	p := tea.NewProgram(m)
