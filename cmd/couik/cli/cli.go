@@ -19,6 +19,9 @@ var (
 	Text    string
 	SetHelp bool
 	Lang    string
+	Host    int
+	Join    string
+	Name    string
 )
 
 func Init() {
@@ -35,4 +38,7 @@ func Init() {
 	RootCmd.Flags().StringVarP(&File, "file", "f", "", "Launch a typing test with a custom text in a file")
 	RootCmd.Flags().StringVarP(&Text, "custom", "c", "", "Launch a typing test with a custom text")
 	RootCmd.Flags().StringVarP(&Lang, "lang", "l", "", "Launch a typing test a specific language")
+	RootCmd.Flags().IntVarP(&Host, "host", "p", 4217, "Host a game")
+	RootCmd.Flags().StringVarP(&Join, "join", "j", "", "Join a game (localip:port name)")
+	RootCmd.Flags().StringVarP(&Name, "name", "n", "", "Your display name when you play multiplayer")
 }

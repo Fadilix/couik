@@ -14,6 +14,8 @@ const (
 	StateResults
 	StateCommandPalette
 	StateConfig
+	StateLobby
+	StateCountdown
 )
 
 // type QuoteType int

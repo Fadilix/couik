@@ -30,6 +30,9 @@ func NewQuoteMode(options ...QuoteOption) *QuoteMode {
 }
 
 func (qm QuoteMode) GetTarget() string {
+	if qm.Target != "" {
+		return qm.Target
+	}
 	quote := typing.GetQuoteUseCase(qm.Language, qm.Category)
 	return quote.Text
 }
@@ -53,6 +56,12 @@ func WithTargetQ(target string) QuoteOption {
 func WithCategoryQ(category database.QuoteCategory) QuoteOption {
 	return func(qm *QuoteMode) {
 		qm.Category = category
+	}
+}
+
+func WithCustomQuote(target string) QuoteOption {
+	return func(qm *QuoteMode) {
+		qm.Target = target
 	}
 }
 
