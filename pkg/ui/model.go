@@ -263,3 +263,7 @@ func WaitForNetworkMsg(c *network.Client) tea.Cmd {
 		return <-c.NextMessage()
 	}
 }
+
+func (m Model) PlayersConnected() int {
+	return len(m.Players)
+}

@@ -59,6 +59,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err := json.Unmarshal(msg.Payload, &startLimit); err != nil {
 				log.Println(err)
 			}
+
+			m.Mu.Lock()
+			for _, p := range m.Players {
+				p.WPM = 0
+				p.Progress = 0
+			}
+			m.Mu.Unlock()
+
 			m = m.ApplyMode(modes.NewQuoteMode(modes.WithCustomQuote(startLimit.Text)))
 			return m, WaitForNetworkMsg(m.Client)
 

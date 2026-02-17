@@ -15,6 +15,11 @@ var dashboardLogo string = CouikASCII3
 
 func (m Model) View() string {
 	_, isTimeMode := m.Mode.(*modes.TimeMode)
+
+	if m.State == core.StateLobby {
+		return m.LobbyView()
+	}
+
 	if m.State == core.StateResults || (isTimeMode && m.TimeLeft <= 0) {
 		return m.resultsView()
 	}

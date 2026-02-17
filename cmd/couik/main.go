@@ -14,6 +14,7 @@ import (
 	"github.com/fadilix/couik/pkg/network"
 	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui"
+	"github.com/fadilix/couik/pkg/ui/core"
 )
 
 func main() {
@@ -88,6 +89,7 @@ func main() {
 		}
 
 		m.Multiplayer = true
+		m.State = core.StateLobby
 		m.IsHost = true
 		playerName := "Host"
 		if cli.Name != "" {
@@ -114,6 +116,7 @@ func main() {
 		m.Client = client
 
 		m.Multiplayer = true
+		m.State = core.StateLobby
 		playerName := "Guest"
 		if cli.Name != "" {
 			playerName = cli.Name
