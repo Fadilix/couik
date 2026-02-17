@@ -28,10 +28,9 @@ func (m Model) View() string {
 		return m.commandPaletteView()
 	}
 
-	if m.State == core.StateConfig {
-		return m.configView()
+	if m.State == core.StateCountdown {
+		return m.countdownView()
 	}
-
 	if m.Quitting {
 		return "Closing Couik...\n"
 	}
@@ -230,6 +229,34 @@ func (m Model) View() string {
 		words,
 		modeSelectorString,
 		quoteTypeSelectorString,
+		m.PlayersView(),
+	)
+
+	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, content)
+}
+
+func (m Model) countdownView() string {
+	logo := CouikASCII3
+	if m.CustomDashboard != "" {
+		logo = m.CustomDashboard
+	}
+
+	header := HeaderStyle.Render(logo)
+
+	countStyle := lipgloss.NewStyle().
+		Foreground(CatMauve).
+		Bold(true).
+		Height(5).
+		Align(lipgloss.Center, lipgloss.Center).
+		Render(fmt.Sprintf("%d", m.Countdown))
+
+	content := lipgloss.JoinVertical(lipgloss.Center,
+		header,
+		"\n\n",
+		lipgloss.NewStyle().Foreground(CatSubtext).Render("starting in..."),
+		"\n",
+		countStyle,
+		"\n\n",
 		m.PlayersView(),
 	)
 

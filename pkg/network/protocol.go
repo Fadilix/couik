@@ -20,11 +20,13 @@ type JoinPayload struct {
 }
 
 type StartPayload struct {
-	Text string `json:"text"`
+	Text      string `json:"text"`
+	Countdown int    `json:"countdown"`
 }
 
 type UpdatePayload struct {
 	PlayerName string  `json:"player_name"`
 	Progress   float64 `json:"progress"`
 	WPM        int     `json:"wpm"`
+	Completed  bool    `json:"completed"`
 }

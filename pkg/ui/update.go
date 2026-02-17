@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/pkg/network"
+	"github.com/fadilix/couik/pkg/typing"
 	"github.com/fadilix/couik/pkg/ui/components"
 	"github.com/fadilix/couik/pkg/ui/core"
 	"github.com/fadilix/couik/pkg/ui/modes"
@@ -22,15 +23,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd := m.Mode.ProcessTick(&m)
 		return m, cmd
 	case core.TickWpmMsg:
-		if m.State == core.StateTyping && m.Session.Started {
-			if m.Multiplayer {
-				go m.Client.SendUpdate(m.PlayerName, int(m.Session.CalculateLiveTypingSpeed()), m.Session.Progress())
-			}
+		if m.State == core.StateCountdown {
+            m.Countdown--
+            if m.Countdown <= 0 {
+                m.State = core.StateTyping
+                m.Active = true
+            }
+            return m, core.WPMTick()
+        }
 
+		if m.State == core.StateTyping && m.Session.Started {
+			if m.Multiplayer && !m.Session.IsFinished() {
+				go m.Client.SendUpdate(m.PlayerName, int(m.Session.CalculateLiveTypingSpeed()), m.Session.Progress(), false)
+			}
 			wpm := m.Session.CalculateLiveTypingSpeed()
-			m.Session.AddWpmSample(wpm)
-			m.Session.AddTimesSample(time.Time(msg))
-			return m, core.WPMTick()
+			if m.State == core.StateTyping {
+				m.Session.AddWpmSample(wpm)
+				m.Session.AddTimesSample(time.Time(msg))
+				return m, core.WPMTick()
+			}
 		}
 		return m, nil
 
@@ -49,9 +60,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.Mu.Unlock()
 
-				// if m.IsHost {
-				// 	m.Client.SendStart(string(m.Session.Target))
-				// }
+				if m.IsHost {
+					m.Client.SendStart(string(m.Session.Target), 0)
+				}
 			}
 
 		case network.MsgStart:
@@ -64,10 +75,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, p := range m.Players {
 				p.WPM = 0
 				p.Progress = 0
+				p.Completed = false
 			}
 			m.Mu.Unlock()
 
 			m = m.ApplyMode(modes.NewQuoteMode(modes.WithCustomQuote(startLimit.Text)))
+
+			if startLimit.Countdown > 0 {
+				m.Countdown = startLimit.Countdown
+				m.State = core.StateCountdown
+				m.Active = false
+				return m, tea.Batch(core.WPMTick(), WaitForNetworkMsg(m.Client))
+			}
+
 			return m, WaitForNetworkMsg(m.Client)
 
 		case network.MsgUpdate:
@@ -146,7 +166,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case tea.KeyCtrlJ:
 			if m.IsHost && m.Multiplayer {
-				m.Client.SendStart(string(m.Session.Target))
+				if m.State == core.StateResults {
+					newQuote := typing.GetQuoteUseCase(m.CurrentLanguage, m.QuoteType)
+					m.Client.SendStart(newQuote.Text, 5)
+				} else {
+					m.Client.SendStart(string(m.Session.Target), 5)
+				}
 			}
 
 		case tea.KeyCtrlE:
@@ -171,11 +196,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.IsSelectingQuoteType = false
 
 		case tea.KeyTab:
-			if m.State == core.StateResults {
+			if m.State == core.StateResults && !m.Multiplayer {
 				return m.GetModelFromMode(m), nil
 			}
 		case tea.KeyCtrlL:
-			if m.State == core.StateResults {
+			if m.State == core.StateResults && !m.Multiplayer {
 				return m.ApplyMode(m.Mode, WithSameQuote(string(m.Session.Target))), nil
 			}
 		case tea.KeyCtrlR:
@@ -222,6 +247,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					Date:     time.Now(),
 				}
 				m.Repo.Save(result)
+
+				if m.Multiplayer {
+					go m.Client.SendUpdate(m.PlayerName, int(m.Session.CalculateTypingSpeed()), 1.0, true)
+				}
 			}
 
 			// Start the timers if just started

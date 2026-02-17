@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/fadilix/couik/pkg/ui/core"
 )
 
 func (m Model) PlayersView() string {
@@ -23,13 +24,21 @@ func (m Model) PlayersView() string {
 	var allPlayers []player
 
 	myProgress := 0.0
+	myWpm := 0
+
 	if m.Session != nil {
 		myProgress = m.Session.Progress()
+
+		if m.State == core.StateResults {
+			myWpm = int(m.Session.CalculateTypingSpeed())
+		} else {
+			myWpm = int(m.Session.CalculateLiveTypingSpeed())
+		}
 	}
 
 	allPlayers = append(allPlayers, player{
 		name:     m.PlayerName,
-		wpm:      int(m.Session.CalculateLiveTypingSpeed()),
+		wpm:      myWpm,
 		progress: myProgress,
 		isMe:     true,
 	})

@@ -21,7 +21,7 @@ func (m Model) LobbyView() string {
 
 	var playersData []string
 
-	if len(m.Players) == 0 {
+	if len(m.Players) == 1 {
 		playersData = append(playersData, lipgloss.NewStyle().Foreground(CatOverlay).Italic(true).Render("waiting for players..."))
 	} else {
 		for name := range m.Players {

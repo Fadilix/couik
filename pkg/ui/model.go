@@ -61,6 +61,7 @@ type Model struct {
 	IsHost      bool
 	PlayerName  string
 	Mu          *sync.Mutex
+	Countdown   int
 	Players     map[string]*network.UpdatePayload
 }
 
