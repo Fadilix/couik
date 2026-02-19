@@ -110,6 +110,16 @@ func (m Model) resultsView() string {
 	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
 	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
 
+	var attribution string
+	if m.QuoteSource != "" {
+		maxWidth := 80
+		label := "Quote from: " + m.QuoteSource
+		if len(label) > maxWidth {
+			label = label[:maxWidth-3] + "..."
+		}
+		attribution = lipgloss.NewStyle().Foreground(CatSubtext).Render(label)
+	}
+
 	var multiplayerStats string
 	if m.Multiplayer {
 		multiplayerStats = m.PlayersView()
@@ -157,6 +167,8 @@ func (m Model) resultsView() string {
 		mainRow,
 		"",
 		multiplayerStats,
+		"",
+		attribution,
 		"",
 		footer,
 		modeSelectorString,

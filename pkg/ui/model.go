@@ -42,6 +42,9 @@ type Model struct {
 	QuoteType            database.QuoteCategory
 	IsSelectingQuoteType bool
 
+	// quote attribution
+	QuoteSource string
+
 	// words
 	InitialWords int
 
@@ -197,6 +200,7 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 
 	newModel.Mode = mode
 	newModel.CurrentLanguage = config.Language
+	newModel.QuoteSource = config.Source
 	newModel.InitialWords = config.InitialWords
 	newModel.QuoteType = config.Category
 
