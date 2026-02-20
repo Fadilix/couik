@@ -20,14 +20,15 @@ First off, thanks for taking the time to contribute! We welcome all contribution
 When you are ready to make a change, follow these steps:
 
 1. **Open an Issue**: Every new feature or bug fix should be linked to an issue. Please open an issue first to discuss your proposed changes before writing code.
-2. **Create a branch**: Create a new branch for your feature or bugfix.
+2. **Create a branch**: Checkout the `dev` branch and create a new branch for your feature or bugfix.
    ```bash
+   git checkout dev
    git checkout -b feat/my-cool-feature
    ```
 3. **Make your changes**: Write your code.
 4. **Test your code**: Ensure the code builds and runs properly without breaking existing functionality.
 5. **Commit your changes**: Make sure to use clear, descriptive commit messages (e.g., `feat: add awesome feature (#20)` referencing the issue number).
-6. **Submit a PR**: Push to your fork and submit a Pull Request against the main repository.
+6. **Submit a PR**: Push to your fork and submit a Pull Request against the `dev` branch of the main repository.
 
 ## Issues
 
