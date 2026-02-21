@@ -115,9 +115,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "h", "left":
 			m.CurrentSelector.Decrement()
 		case "ctrl+n":
-			if m.CurrentLanguage == database.English {
+			switch m.CurrentLanguage {
+			case database.English:
 				m.CurrentLanguage = database.French
-			} else {
+			case database.French:
 				m.CurrentLanguage = database.English
 			}
 
@@ -134,6 +135,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.ApplyMode(modes.NewQuoteMode(
 				modes.WithCategoryQ(cfg.Category),
 				modes.WithLanguageQ(m.CurrentLanguage),
+				modes.WithTargetQ(typing.GetQuoteUseCase(m.CurrentLanguage, cfg.Category).Text),
 			)), nil
 
 		case "enter":
