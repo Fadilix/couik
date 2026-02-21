@@ -64,6 +64,10 @@ func main() {
 	if cli.Words > 0 {
 		m = m.GetDictionnaryModelWithWords(cli.Words, choosedLanguage)
 	} else if cli.Time > 0 {
+		if cli.Time < 5 {
+			fmt.Println("Time should be greater than 5 seconds!\nTry again with a greater time")
+			return
+		}
 		m = m.GetDictionnaryModel(cli.Time)
 	} else if cli.File != "" {
 		quote, err := typing.GetQuoteFromFile(cli.File)
