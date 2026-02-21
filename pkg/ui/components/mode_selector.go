@@ -1,5 +1,7 @@
 package components
 
+import "github.com/fadilix/couik/cmd/couik/cli"
+
 type ModeSelector struct {
 	Cursor  int
 	Choices []string
@@ -8,7 +10,7 @@ type ModeSelector struct {
 func NewModeSelector() *ModeSelector {
 	return &ModeSelector{
 		Cursor:  0,
-		Choices: []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"},
+		Choices: cli.TimeWordsVals,
 	}
 }
 
