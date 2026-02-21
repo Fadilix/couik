@@ -24,13 +24,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case core.TickWpmMsg:
 		if m.State == core.StateCountdown {
-            m.Countdown--
-            if m.Countdown <= 0 {
-                m.State = core.StateTyping
-                m.Active = true
-            }
-            return m, core.WPMTick()
-        }
+			m.Countdown--
+			if m.Countdown <= 0 {
+				m.State = core.StateTyping
+				m.Active = true
+			}
+			return m, core.WPMTick()
+		}
 
 		if m.State == core.StateTyping && m.Session.Started {
 			if m.Multiplayer && !m.Session.IsFinished() {
@@ -115,9 +115,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "h", "left":
 			m.CurrentSelector.Decrement()
 		case "ctrl+n":
-			if m.CurrentLanguage == database.English {
+			switch m.CurrentLanguage {
+			case database.English:
 				m.CurrentLanguage = database.French
-			} else {
+			case database.French:
 				m.CurrentLanguage = database.English
 			}
 
@@ -134,6 +135,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.ApplyMode(modes.NewQuoteMode(
 				modes.WithCategoryQ(cfg.Category),
 				modes.WithLanguageQ(m.CurrentLanguage),
+				modes.WithTargetQ(typing.GetQuoteUseCase(m.CurrentLanguage, cfg.Category).Text),
 			)), nil
 
 		case "enter":
@@ -204,6 +206,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m.ApplyMode(m.Mode, WithSameQuote(string(m.Session.Target))), nil
 			}
 		case tea.KeyCtrlR:
+			// log.Println("i pressed ctrl+r")
+			// log.Println(m.State)
 			if m.State == core.StateCommandPalette || m.State == core.StateConfig {
 				m.State = core.StateTyping
 				return m, nil

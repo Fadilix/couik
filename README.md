@@ -10,7 +10,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fadilix/couik)](https://github.com/fadilix/couik/releases)
 
 
-<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/683b8898-9d75-48ee-888f-e808a3c738ef" />
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/d8bf2f78-28b2-4988-8806-8f353a0cb6a0" />
 
 
 </div>
@@ -151,11 +151,34 @@ time: ""
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+First off, thanks for taking the time to contribute! We welcome all contributions, big or small.
 
-1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/amazing-feature`).
-3. Commit your changes (`git commit -m 'Add some amazing feature'`).
-4. Push to the branch (`git push origin feature/amazing-feature`).
-5. Open a Pull Request.
+### Development Setup
 
+1. **Fork** the repository on GitHub.
+2. **Clone** your fork locally:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/couik.git
+   cd couik
+   ```
+3. **Run** the project locally to ensure everything works:
+   ```bash
+   go run cmd/couik/main.go
+   ```
+
+### Pull Requests
+
+When you are ready to make a change, follow these steps:
+
+1. **Open an Issue**: Every new feature or bug fix should be linked to an issue. Please open an issue first to discuss your proposed changes before writing code.
+2. **Create a branch**: Create a new branch for your feature or bugfix.
+   ```bash
+   git checkout -b feat/my-cool-feature
+   ```
+3. **Make your changes**: Write your code and make sure to use clear, descriptive commit messages (e.g., `feat: add awesome feature (#20)`).
+4. **Test your code**: Ensure the code builds and runs properly without breaking existing functionality.
+5. **Submit a PR**: Push to your fork and submit a Pull Request against the main repository.
+
+### Issues
+
+If you find a bug or have a feature request, [open an issue](https://github.com/fadilix/couik/issues) on GitHub. Include as much detail as possible to help us understand the problem or request.
