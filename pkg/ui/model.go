@@ -74,7 +74,7 @@ func NewModel(target string) Model {
 	p.Full = '━'
 	p.Empty = '─'
 
-	typingModes := []string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}
+	typingModes := []string{"15s", "30s", "60s", "120s", "quote", "w10", "w25"}
 
 	defaultQT := database.Mid
 	defaultInitTime := 30
@@ -223,20 +223,20 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 }
 
 // GetModelFromMode does the same as the one above
-// but just for the specific case of keytab
+// but just for the specific case of keytab and ctrl+r
 func (m *Model) GetModelFromMode(mod Model) Model {
-	config := mod.Mode.GetConfig()
-	model := NewModel(config.Target)
-
-	model.Mode = mod.Mode
-	model.CurrentLanguage = config.Language
-	model.initialTime = mod.initialTime
-	model.TimeLeft = mod.initialTime
-	model.InitialWords = mod.InitialWords
-	model.TerminalHeight = m.TerminalHeight
-	model.TerminalWidth = m.TerminalWidth
-	model.ProgressBar = m.ProgressBar
-	return model
+	var newMode modes.ModeStrategy
+	switch mod.Mode.(type) {
+	case *modes.QuoteMode:
+		newMode = modes.NewQuoteMode(modes.WithLanguageQ(mod.CurrentLanguage), modes.WithCategoryQ(mod.QuoteType))
+	case *modes.TimeMode:
+		newMode = modes.NewTimeMode(modes.WithLanguageT(mod.CurrentLanguage), modes.WithInitialTimeT(mod.initialTime))
+	case *modes.WordMode:
+		newMode = modes.NewWordMode(modes.WithLanguageW(mod.CurrentLanguage), modes.WithInitialWords(mod.InitialWords))
+	default:
+		newMode = mod.Mode
+	}
+	return m.ApplyMode(newMode)
 }
 
 // CreateModeFromSelection parses the selection string and returns the appropriate ModeStrategy.
@@ -247,8 +247,8 @@ func CreateModeFromSelection(selection string, lang database.Language) modes.Mod
 		return modes.NewTimeMode(modes.WithInitialTimeT(seconds), modes.WithLanguageT(lang))
 	}
 
-	if strings.HasPrefix(selection, "words ") {
-		count, _ := strconv.Atoi(strings.TrimPrefix(selection, "words "))
+	if strings.HasPrefix(selection, "w") {
+		count, _ := strconv.Atoi(strings.TrimPrefix(selection, "w"))
 		return modes.NewWordMode(modes.WithInitialWords(count), modes.WithLanguageW(lang))
 	}
 
