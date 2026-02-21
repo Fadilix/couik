@@ -20,6 +20,10 @@ func (m Model) View() string {
 		return m.LobbyView()
 	}
 
+	if m.State == core.StateConfig {
+		return m.configView()
+	}
+
 	if m.State == core.StateResults || (isTimeMode && m.TimeLeft <= 0) {
 		return m.resultsView()
 	}
