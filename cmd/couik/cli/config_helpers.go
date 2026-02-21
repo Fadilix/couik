@@ -10,6 +10,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	TimeWordsVals = []string{"15s", "30s", "60s", "120s", "quote", "w10", "w25", "w50", "w100", "w200"}
+	modes         = []string{"quote", "time", "words"}
+	quoteTypes    = []string{"small", "mid", "thicc"}
+	languages     = []string{"french", "english"}
+)
+
 func GetConfig() Config {
 	path, err := database.GetPath(database.Config)
 	if err != nil {
@@ -45,7 +52,7 @@ func SetConfig(key, value string) {
 
 	switch key {
 	case "mode":
-		if !slices.Contains([]string{"quote", "time", "words"}, value) {
+		if !slices.Contains(modes, value) {
 			log.Fatal("Can't use this value")
 		}
 		config.Mode = value
@@ -56,17 +63,17 @@ func SetConfig(key, value string) {
 		}
 		config.DashboardASCII = value
 	case "quote_type":
-		if !slices.Contains([]string{"small", "mid", "thicc"}, value) {
+		if !slices.Contains(quoteTypes, value) {
 			log.Fatal("Can't use this value as quote_type")
 		}
 		config.QuoteType = value
 
 	case "time":
-		if !slices.Contains([]string{"15s", "30s", "60s", "120s", "quote", "words 10", "words 25"}, value) {
+		if !slices.Contains(TimeWordsVals, value) {
 			log.Fatal("You can't use that value as preffered time")
 		}
 	case "language":
-		if !slices.Contains([]string{"french", "english"}, value) {
+		if !slices.Contains(languages, value) {
 			log.Fatal("Can't use this language (only english and french available for now)")
 		}
 		config.Language = value
