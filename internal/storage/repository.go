@@ -24,17 +24,12 @@ func (r *JSONRepository) Save(test database.TestResult) error {
 		return err
 	}
 
-	if !database.FileExists(file) {
-		initialData := "[]"
-		return os.WriteFile(file, []byte(initialData), 0o644)
-	}
-
-	data, err := os.ReadFile(file)
-
-	if err == nil {
-		err := json.Unmarshal(data, &history)
-		if err != nil {
-			return err
+	if database.FileExists(file) {
+		data, err := os.ReadFile(file)
+		if err == nil && len(data) > 0 {
+			if err := json.Unmarshal(data, &history); err != nil {
+				history = make(database.History, 0)
+			}
 		}
 	}
 
@@ -62,7 +57,7 @@ func (r *JSONRepository) GetHistory() (database.History, error) {
 	var history database.History
 
 	if err := json.Unmarshal(data, &history); err != nil {
-		return nil, err
+		return make(database.History, 0), nil
 	}
 
 	return history, nil
