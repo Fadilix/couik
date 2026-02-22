@@ -28,6 +28,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.Countdown <= 0 {
 				m.State = core.StateTyping
 				m.Active = true
+				m.Session.Start()
 			}
 			return m, core.WPMTick()
 		}

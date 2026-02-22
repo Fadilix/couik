@@ -30,12 +30,15 @@ func NewSession(target string) *Session {
 	}
 }
 
-func (s *Session) Type(char string) {
+func (s *Session) Start() {
 	if !s.Started {
 		s.StartTime = time.Now()
 		s.Started = true
 	}
+}
 
+func (s *Session) Type(char string) {
+	// s.Start()
 	if s.Index < len(s.Target) {
 		isCorrect := char == string(s.Target[s.Index])
 		s.IsError = !isCorrect
