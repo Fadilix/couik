@@ -44,7 +44,7 @@ type Model struct {
 
 	// words
 	InitialWords int
-
+	QuoteSource  string
 	// Cached config or use default
 	CustomDashboard string
 	CurrentLanguage database.Language
@@ -197,6 +197,7 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 
 	newModel.Mode = mode
 	newModel.CurrentLanguage = config.Language
+	newModel.QuoteSource = config.Source
 	newModel.InitialWords = config.InitialWords
 	newModel.QuoteType = config.Category
 
