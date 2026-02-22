@@ -8,6 +8,7 @@ const (
 	MsgJoin   MessageType = "join"
 	MsgStart  MessageType = "start"
 	MsgUpdate MessageType = "update"
+	MsgBye    MessageType = "bye"
 )
 
 type Message struct {
@@ -16,6 +17,10 @@ type Message struct {
 }
 
 type JoinPayload struct {
+	PlayerName string `json:"player_name"`
+}
+
+type DisconnectPayload struct {
 	PlayerName string `json:"player_name"`
 }
 
