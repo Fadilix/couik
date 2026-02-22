@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 )
@@ -33,6 +34,8 @@ func (s *Server) Start(port string) {
 
 	if err != nil {
 		log.Println("Error while listening to port : ", port, err)
+		// log.Printf("Error while listening to port : %s - port is already is in use\n", port)
+		os.Exit(1)
 	}
 
 	for {
@@ -65,7 +68,22 @@ func (s *Server) HandleJoin(conn net.Conn) {
 	for {
 		var msg Message
 		if err := decoder.Decode(&msg); err != nil {
-			log.Println("Client disconnected on error", err)
+			s.Mu.Lock()
+			name, _ := s.Clients[conn]
+			s.Mu.Unlock()
+
+			payload := &DisconnectPayload{PlayerName: name}
+			data, err := json.Marshal(payload)
+			if err != nil {
+				log.Println("Error while disconnecting")
+			}
+
+			disconnectMsg := &Message{
+				Type:    MsgBye,
+				Payload: data,
+			}
+			s.HandleMessage(conn, *disconnectMsg)
+			// log.Println("Client disconnected on error", err)
 			break
 		}
 		s.HandleMessage(conn, msg)
@@ -96,6 +114,9 @@ func (s *Server) HandleMessage(sender net.Conn, msg Message) {
 		s.Broadcast(msg)
 	case MsgUpdate:
 		s.Broadcast(msg)
+	case MsgBye:
+		s.Broadcast(msg)
+
 	default:
 		log.Printf("Unknown message %s\n", msg.Type)
 	}

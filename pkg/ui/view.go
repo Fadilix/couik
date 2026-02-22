@@ -215,6 +215,16 @@ func (m Model) View() string {
 		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 	)
 
+	var discoRes string
+
+	if m.LastDisconnected != "" {
+		discoRes = lipgloss.NewStyle().
+			Foreground(CatYellow).
+			Faint(true).
+			Italic(true).
+			Render(fmt.Sprintf("%s just disconnected", m.LastDisconnected))
+	}
+
 	content := lipgloss.JoinVertical(lipgloss.Center,
 		HeaderStyle.Render(renderedLogo),
 		"",
@@ -225,7 +235,7 @@ func (m Model) View() string {
 		statsRow,
 		"",
 		bar,
-		"",
+		discoRes,
 		"",
 		footerText,
 		"",
