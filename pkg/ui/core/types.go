@@ -50,3 +50,11 @@ func WPMTick() tea.Cmd {
 		return TickWpmMsg(t)
 	})
 }
+
+type ClearDisconnectMsg struct{}
+
+func ClearDisconnectCmd() tea.Cmd {
+	return tea.Tick(2*time.Second, func(_ time.Time) tea.Msg {
+		return ClearDisconnectMsg{}
+	})
+}

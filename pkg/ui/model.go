@@ -57,12 +57,13 @@ type Model struct {
 
 	Client *network.Client
 	// multiplayer
-	Multiplayer bool
-	IsHost      bool
-	PlayerName  string
-	Mu          *sync.Mutex
-	Countdown   int
-	Players     map[string]*network.UpdatePayload
+	Multiplayer      bool
+	IsHost           bool
+	PlayerName       string
+	Mu               *sync.Mutex
+	Countdown        int
+	Players          map[string]*network.UpdatePayload
+	LastDisconnected string
 }
 
 func NewModel(target string) Model {
@@ -214,6 +215,7 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 	newModel.PlayerName = m.PlayerName
 	newModel.Players = m.Players
 	newModel.Mu = m.Mu
+	newModel.LastDisconnected = m.LastDisconnected
 
 	for _, option := range options {
 		option(&newModel)

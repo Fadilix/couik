@@ -14,8 +14,12 @@ import (
 	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
+
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case core.ClearDisconnectMsg:
+		m.LastDisconnected = ""
+		return m, nil
 	case core.TickMsg:
 		if m.State != core.StateTyping {
 			return m, nil
@@ -99,6 +103,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Mu.Lock()
 				m.Players[updatePayload.PlayerName] = &updatePayload
 				m.Mu.Unlock()
+			}
+		case network.MsgBye:
+			var disconnectPayload network.DisconnectPayload
+			if err := json.Unmarshal(msg.Payload, &disconnectPayload); err != nil {
+				log.Println(err)
+			} else {
+				m.Mu.Lock()
+				delete(m.Players, disconnectPayload.PlayerName)
+				m.Mu.Unlock()
+				m.LastDisconnected = disconnectPayload.PlayerName
+				return m, tea.Batch(WaitForNetworkMsg(m.Client), core.ClearDisconnectCmd())
 			}
 		}
 		return m, WaitForNetworkMsg(m.Client)
