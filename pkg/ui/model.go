@@ -66,7 +66,16 @@ type Model struct {
 	LastDisconnected string
 }
 
-func NewModel(target string) Model {
+type NewModelOption func(*Model)
+
+func WithMultiplayer() NewModelOption {
+	return func(m *Model) {
+		m.Multiplayer = true
+		m.State = core.StateLobby
+	}
+}
+
+func NewModel(target string, options ...NewModelOption) Model {
 	p := progress.New(
 		progress.WithSolidFill("#FFFFFF"),
 		progress.WithWidth(20),
@@ -114,7 +123,9 @@ func NewModel(target string) Model {
 
 	loadedPrs := storage.LoadPRs()
 
-	return Model{
+	defaultState := core.StateTyping
+
+	model := Model{
 		Session:         engine.NewSession(target),
 		ProgressBar:     p,
 		TimeLeft:        currentTime,
@@ -128,7 +139,14 @@ func NewModel(target string) Model {
 		PRs:             loadedPrs,
 		Players:         make(map[string]*network.UpdatePayload),
 		Mu:              &sync.Mutex{},
+		State:           defaultState,
 	}
+
+	for _, option := range options {
+		option(&model)
+	}
+
+	return model
 }
 
 func (m Model) Init() tea.Cmd {

@@ -14,7 +14,6 @@ import (
 	"github.com/fadilix/couik/pkg/ui/modes"
 )
 
-
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.ClearDisconnectMsg:
@@ -65,9 +64,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.Mu.Unlock()
 
-				if m.IsHost {
-					m.Client.SendStart(string(m.Session.Target), 0)
-				}
 			}
 
 		case network.MsgStart:
