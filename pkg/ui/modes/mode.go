@@ -21,4 +21,5 @@ type TickContext interface {
 	SetState(s core.SessionState)
 	GetSession() *engine.Session
 	CacheChart()
+	SaveResult()
 }

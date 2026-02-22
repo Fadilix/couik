@@ -173,9 +173,8 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 
 // GetDictionnaryModelWithWords creates a model with custom words length
 // for word mode typing tests
-var newTarget strings.Builder
-
 func (m Model) GetDictionnaryModelWithWords(words int, language database.Language) Model {
+	var newTarget strings.Builder
 	dictionnary := typing.GetDictionnary(language)
 
 	wordCount := 0

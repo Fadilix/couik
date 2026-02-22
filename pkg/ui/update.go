@@ -258,19 +258,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Session.Started = false
 				m.Active = false
 				m.CachedChart = DisplayChart(m.Session.WpmSamples, m.Session.TimesSample, min(max(m.TerminalWidth/3, 20), 40), 10)
-				result := database.TestResult{
-					RawWPM:   m.Session.CalculateRawTypingSpeed(),
-					WPM:      m.Session.CalculateTypingSpeed(),
-					Acc:      m.Session.CalculateAccuracy(),
-					Duration: m.Session.EndTime.Sub(m.Session.StartTime),
-					Quote:    string(m.Session.Target),
-					Date:     time.Now(),
-				}
-				m.Repo.Save(result)
-
-				if m.Multiplayer {
-					go m.Client.SendUpdate(m.PlayerName, int(m.Session.CalculateTypingSpeed()), 1.0, true)
-				}
+				m.SaveResult()
 			}
 
 			// Start the timers if just started
