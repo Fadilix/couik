@@ -36,6 +36,15 @@ Whether you want to warm up before coding, challenge your friends, or just track
 
 ### Linux
 
+#### Quick Install (recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Fadilix/couik/main/scripts/install.sh | bash
+```
+
+> Automatically detects your CPU architecture (`x86_64` / `arm64`) and installs the right binary to `/usr/local/bin`.  
+> On **Arch Linux** it will use your AUR helper (`yay`, `paru`, …) if one is found.
+
 #### Arch Linux (AUR)
 ```bash
 yay -S couik-bin
