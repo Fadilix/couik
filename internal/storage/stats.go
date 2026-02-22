@@ -69,7 +69,7 @@ func LoadPRs() Stats {
 
 	err = json.Unmarshal(data, &statsConfig)
 	if err != nil {
-		log.Printf("Error retrieving stats data: %v. Resetting stats.", err)
+		// log.Printf("Error retrieving stats data: %v. Resetting stats.", err)
 		return Stats{}
 	}
 	return statsConfig

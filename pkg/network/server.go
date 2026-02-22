@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 )
@@ -33,6 +34,8 @@ func (s *Server) Start(port string) {
 
 	if err != nil {
 		log.Println("Error while listening to port : ", port, err)
+		// log.Printf("Error while listening to port : %s - port is already is in use\n", port)
+		os.Exit(1)
 	}
 
 	for {
