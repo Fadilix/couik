@@ -61,9 +61,9 @@ func main() {
 	var m ui.Model
 
 	if cli.Host != 4217 {
-		m = ui.NewModel(target)
-	} else {
 		m = ui.NewModel(target, ui.WithMultiplayer())
+	} else {
+		m = ui.NewModel(target)
 	}
 	m.CurrentLanguage = choosedLanguage
 
