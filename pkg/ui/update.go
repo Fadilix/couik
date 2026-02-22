@@ -241,6 +241,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			_, isTimeMode := m.Mode.(*modes.TimeMode)
 			wasStarted := m.Session.Started
 
+			if !wasStarted {
+				m.Session.Start()
+			}
+
 			if !m.Active && isTimeMode {
 				m.Active = true
 			}
