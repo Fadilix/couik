@@ -17,16 +17,19 @@ type QuoteMode struct {
 type QuoteOption func(qm *QuoteMode)
 
 func NewQuoteMode(options ...QuoteOption) *QuoteMode {
-	quote := typing.GetQuoteUseCase(database.English, database.Mid)
 	qm := &QuoteMode{
-		Target:   quote.Text,
-		Source:   quote.Source,
 		Language: database.English,
 		Category: database.Mid,
 	}
 
 	for _, option := range options {
 		option(qm)
+	}
+
+	if qm.Target == "" {
+		quote := typing.GetQuoteUseCase(qm.Language, qm.Category)
+		qm.Target = quote.Text
+		qm.Source = quote.Source
 	}
 
 	return qm
