@@ -9,6 +9,7 @@ import (
 
 type QuoteMode struct {
 	Target   string
+	Source   string
 	Language database.Language
 	Category database.QuoteCategory
 }
@@ -17,13 +18,18 @@ type QuoteOption func(qm *QuoteMode)
 
 func NewQuoteMode(options ...QuoteOption) *QuoteMode {
 	qm := &QuoteMode{
-		Target:   typing.GetQuoteUseCase(database.English, database.Mid).Text,
 		Language: database.English,
 		Category: database.Mid,
 	}
 
 	for _, option := range options {
 		option(qm)
+	}
+
+	if qm.Target == "" {
+		quote := typing.GetQuoteUseCase(qm.Language, qm.Category)
+		qm.Target = quote.Text
+		qm.Source = quote.Source
 	}
 
 	return qm
@@ -72,6 +78,7 @@ func (qm QuoteMode) ProcessTick(ctx TickContext) tea.Cmd {
 func (qm QuoteMode) GetConfig() core.ModeConfig {
 	return core.ModeConfig{
 		Target:   qm.GetTarget(),
+		Source:   qm.Source,
 		Language: qm.Language,
 		Category: qm.Category,
 	}
