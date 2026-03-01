@@ -53,7 +53,12 @@ func GetPath(option fileOption) (string, error) {
 	fullpath := filepath.Join(appDir, filename)
 
 	if !FileExists(fullpath) {
-		err := os.WriteFile(fullpath, []byte(" "), 0o644)
+		initialContent := "{}"
+		if option == Historyy || option == Stats {
+			initialContent = "[]"
+		}
+
+		err := os.WriteFile(fullpath, []byte(initialContent), 0o644)
 		if err != nil {
 			return "", err
 		}

@@ -58,7 +58,13 @@ func main() {
 
 	target := randomQuote.Text
 
-	m := ui.NewModel(target)
+	var m ui.Model
+
+	if cli.Host != 4217 {
+		m = ui.NewModel(target, ui.WithMultiplayer())
+	} else {
+		m = ui.NewModel(target)
+	}
 	m.CurrentLanguage = choosedLanguage
 
 	if cli.Words > 0 {

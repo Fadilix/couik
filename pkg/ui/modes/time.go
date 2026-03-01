@@ -69,6 +69,7 @@ func (t TimeMode) ProcessTick(ctx TickContext) tea.Cmd {
 		ctx.GetSession().EndTime = time.Now()
 		ctx.GetSession().Started = false
 		ctx.CacheChart()
+		ctx.SaveResult()
 		return nil
 	}
 

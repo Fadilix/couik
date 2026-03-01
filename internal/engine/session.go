@@ -30,12 +30,15 @@ func NewSession(target string) *Session {
 	}
 }
 
-func (s *Session) Type(char string) {
+func (s *Session) Start() {
 	if !s.Started {
 		s.StartTime = time.Now()
 		s.Started = true
 	}
+}
 
+func (s *Session) Type(char string) {
+	// s.Start()
 	if s.Index < len(s.Target) {
 		isCorrect := char == string(s.Target[s.Index])
 		s.IsError = !isCorrect
@@ -55,6 +58,9 @@ func (s *Session) BackSpace() {
 
 func (s *Session) CalculateTypingSpeed() float64 {
 	duration := s.EndTime.Sub(s.StartTime)
+	if duration.Minutes() == 0 {
+		return 0
+	}
 
 	correctChars := 0
 	for _, r := range s.Results[:s.Index] {
@@ -84,6 +90,9 @@ func (s *Session) CalculateLiveTypingSpeed() float64 {
 
 func (s *Session) CalculateRawTypingSpeed() float64 {
 	duration := s.EndTime.Sub(s.StartTime)
+	if duration.Minutes() == 0 {
+		return 0
+	}
 
 	correctChars := 0
 	for _, r := range s.Results[:s.Index] {

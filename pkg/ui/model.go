@@ -58,15 +58,25 @@ type Model struct {
 
 	Client *network.Client
 	// multiplayer
-	Multiplayer bool
-	IsHost      bool
-	PlayerName  string
-	Mu          *sync.Mutex
-	Countdown   int
-	Players     map[string]*network.UpdatePayload
+	Multiplayer      bool
+	IsHost           bool
+	PlayerName       string
+	Mu               *sync.Mutex
+	Countdown        int
+	Players          map[string]*network.UpdatePayload
+	LastDisconnected string
 }
 
-func NewModel(target string) Model {
+type NewModelOption func(*Model)
+
+func WithMultiplayer() NewModelOption {
+	return func(m *Model) {
+		m.Multiplayer = true
+		m.State = core.StateLobby
+	}
+}
+
+func NewModel(target string, options ...NewModelOption) Model {
 	p := progress.New(
 		progress.WithSolidFill("#FFFFFF"),
 		progress.WithWidth(20),
@@ -114,7 +124,9 @@ func NewModel(target string) Model {
 
 	loadedPrs := storage.LoadPRs()
 
-	return Model{
+	defaultState := core.StateTyping
+
+	model := Model{
 		Session:         engine.NewSession(target),
 		ProgressBar:     p,
 		TimeLeft:        currentTime,
@@ -128,7 +140,14 @@ func NewModel(target string) Model {
 		PRs:             loadedPrs,
 		Players:         make(map[string]*network.UpdatePayload),
 		Mu:              &sync.Mutex{},
+		State:           defaultState,
 	}
+
+	for _, option := range options {
+		option(&model)
+	}
+
+	return model
 }
 
 func (m Model) Init() tea.Cmd {
@@ -155,9 +174,8 @@ func (m Model) GetDictionnaryModel(duration int) Model {
 
 // GetDictionnaryModelWithWords creates a model with custom words length
 // for word mode typing tests
-var newTarget strings.Builder
-
 func (m Model) GetDictionnaryModelWithWords(words int, language database.Language) Model {
+	var newTarget strings.Builder
 	dictionnary := typing.GetDictionnary(language)
 
 	wordCount := 0
@@ -216,6 +234,7 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 	newModel.PlayerName = m.PlayerName
 	newModel.Players = m.Players
 	newModel.Mu = m.Mu
+	newModel.LastDisconnected = m.LastDisconnected
 
 	for _, option := range options {
 		option(&newModel)
