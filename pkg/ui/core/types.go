@@ -16,6 +16,7 @@ const (
 	StateConfig
 	StateLobby
 	StateCountdown
+	StateHistory
 )
 
 // type QuoteType int
@@ -58,4 +59,3 @@ func ClearDisconnectCmd() tea.Cmd {
 		return ClearDisconnectMsg{}
 	})
 }
-

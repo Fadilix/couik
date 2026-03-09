@@ -1,12 +1,15 @@
 package ui
 
 import (
+	"fmt"
+	"log"
 	"slices"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fadilix/couik/cmd/couik/cli"
 	"github.com/fadilix/couik/database"
@@ -64,6 +67,9 @@ type Model struct {
 	Countdown        int
 	Players          map[string]*network.UpdatePayload
 	LastDisconnected string
+
+	// history management
+	table table.Model
 }
 
 type NewModelOption func(*Model)
@@ -125,6 +131,33 @@ func NewModel(target string, options ...NewModelOption) Model {
 
 	defaultState := core.StateTyping
 
+	Rows := []table.Row{}
+
+	history, err := database.GetHistory()
+	if err != nil {
+		log.Println(err)
+	}
+
+	if len(history) > 0 {
+		for _, tr := range history {
+			WPM := fmt.Sprintf("%.2f", tr.WPM)
+			rawWPM := fmt.Sprintf("%.2f", tr.RawWPM)
+			Acc := fmt.Sprintf("%.2f", tr.Acc)
+			Duration := tr.Duration.String()
+			// Date := fmt.Sprintf("%v", tr.Date)
+
+			Rows = append(Rows, table.Row{WPM, rawWPM, Acc, Duration})
+		}
+	}
+
+	t := table.New(
+		table.WithColumns(cli.Columns),
+		table.WithRows(Rows),
+		table.WithFocused(true),
+		table.WithHeight(7),
+		table.WithWidth(42),
+	)
+
 	model := Model{
 		Session:         engine.NewSession(target),
 		ProgressBar:     p,
@@ -140,6 +173,7 @@ func NewModel(target string, options ...NewModelOption) Model {
 		Players:         make(map[string]*network.UpdatePayload),
 		Mu:              &sync.Mutex{},
 		State:           defaultState,
+		table:           t,
 	}
 
 	for _, option := range options {

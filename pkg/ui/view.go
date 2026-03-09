@@ -16,6 +16,10 @@ var dashboardLogo string = CouikASCII3
 func (m Model) View() string {
 	_, isTimeMode := m.Mode.(*modes.TimeMode)
 
+	if m.State == core.StateHistory {
+		return m.HistoryView()
+	}
+
 	if m.State == core.StateLobby {
 		return m.LobbyView()
 	}
@@ -247,6 +251,31 @@ func (m Model) View() string {
 	)
 
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, content)
+}
+
+func (m Model) HistoryView() string {
+	baseStyle := lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240"))
+
+	title := "View your history"
+	dashboard := ""
+	dashboard = m.CustomDashboard
+
+	if dashboard == "" {
+		dashboard = dashboardLogo
+	}
+
+	dashboardStyle := lipgloss.NewStyle().Foreground(CatMauve)
+
+	final := lipgloss.JoinVertical(
+		lipgloss.Center,
+		dashboardStyle.Render(dashboard),
+		"\n",
+		title,
+		baseStyle.Render(m.table.View()+"\n"+m.table.HelpView()+"\n"),
+	)
+	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, final)
 }
 
 func (m Model) countdownView() string {
