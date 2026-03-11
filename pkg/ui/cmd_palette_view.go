@@ -18,7 +18,7 @@ func (m Model) commandPaletteView() string {
 		{"SHIFT + TAB", "Choose typing mode"},
 		{"TAB", "Restart (when on results page)"},
 		{"CTRL + P", "Show this palette"},
-		{"CTRL + N", "Swtich to French/English"},
+		{"CTRL + N", "Switch to French/English"},
 		{"CTRL + G", "Show user config"},
 	}
 

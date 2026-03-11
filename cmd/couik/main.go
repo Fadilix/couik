@@ -24,11 +24,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if cli.History {
-		cli.DisplayHistory()
-		return
-	}
-
 	if cli.Help {
 		cli.DisplayHelp()
 		return
@@ -141,6 +136,10 @@ func main() {
 			log.Fatal(err)
 		}
 
+	}
+
+	if cli.History {
+		m.State = core.StateHistory
 	}
 
 	p := tea.NewProgram(m)
