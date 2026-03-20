@@ -15,6 +15,7 @@ import (
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case core.ClearDisconnectMsg:
 		m.LastDisconnected = ""
@@ -147,7 +148,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.ApplyMode(modes.NewQuoteMode(
 				modes.WithCategoryQ(cfg.Category),
 				modes.WithLanguageQ(m.CurrentLanguage),
-				modes.WithTargetQ(typing.GetQuoteUseCase(m.CurrentLanguage, cfg.Category).Text),
 			)), nil
 
 		case "enter":
@@ -178,6 +178,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			m.Quitting = true
 			return m, tea.Quit
+		case tea.KeyCtrlH:
+			m.State = core.StateHistory
 		case tea.KeyCtrlJ:
 			if m.IsHost && m.Multiplayer {
 				if m.State == core.StateResults {
@@ -275,5 +277,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-	return m, nil
+	m.table, cmd = m.table.Update(msg)
+	return m, cmd
 }

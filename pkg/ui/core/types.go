@@ -16,6 +16,7 @@ const (
 	StateConfig
 	StateLobby
 	StateCountdown
+	StateHistory
 )
 
 // type QuoteType int
@@ -28,6 +29,7 @@ const (
 
 type ModeConfig struct {
 	Target       string
+	Source       string
 	Duration     int
 	InitialWords int
 	Language     database.Language
@@ -58,4 +60,3 @@ func ClearDisconnectCmd() tea.Cmd {
 		return ClearDisconnectMsg{}
 	})
 }
-
