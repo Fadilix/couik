@@ -29,6 +29,7 @@ const (
 
 type ModeConfig struct {
 	Target       string
+	Source       string
 	Duration     int
 	InitialWords int
 	Language     database.Language
