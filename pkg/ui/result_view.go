@@ -113,7 +113,8 @@ func (m Model) resultsView() string {
 	var attribution string
 	if m.QuoteSource != "" {
 		maxWidth := 80
-		label := "Quote Source: " + m.QuoteSource
+
+		label := "Source: " + m.QuoteSource
 		if len(label) > maxWidth {
 			label = label[:maxWidth-3] + "..."
 		}
