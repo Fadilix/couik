@@ -157,7 +157,6 @@ func NewModel(target string, options ...NewModelOption) Model {
 		table.WithFocused(true),
 		table.WithHeight(7),
 		table.WithWidth(42),
-		// table.WithKeyMap(table.DefaultKeyMap()),
 	)
 
 	model := Model{
