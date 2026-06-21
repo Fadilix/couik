@@ -1,0 +1,14 @@
+services:
+  couik:
+    tty: true
+    stdin_open: true
+    environment:
+      - XDG_CONFIG_HOME=/couik
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - couik-vol:/couik
+volumes:
+  couik-vol:
+
