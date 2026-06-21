@@ -26,6 +26,7 @@ Whether you want to warm up before coding, challenge your friends, or just track
 - **Timed Mode**: Test yourself against the clock (`15s`, `30s`, `60s`, `120s`).
 - **Word Mode**: Practice with a set number of words (`10`, `25`, `50`, `100`).
 - **Custom Text**: Load your own text files or paste custom strings.
+- **Ghost Mode**: Race a translucent replay of your last run on the same text — see exactly where you slowed down or sped up, and try to beat it. Toggle with `Ctrl+H` mid-run, or `couik config set ghost off` to disable.
 - **History Tracking**: Keep track of your progress over time with built-in stats.
 - **Beautiful UI**: Modern, clean interface with real-time feedback.
 - **Cross-Platform**: Works on Linux, macOS, and Windows.
@@ -136,6 +137,7 @@ couik [flags]
 | `Ctrl+E`         | Open / close the quote type selector               |
 | `Ctrl+P`         | Open command palette                               |
 | `Ctrl+G`         | Open configuration view                            |
+| `Ctrl+H`         | Toggle Ghost Mode (only on the typing screen)      |
 
 #### Multiplayer (lobby)
 
@@ -160,6 +162,7 @@ couik config set [key] [value]
 | `time`            | `15s`, `30s`, `60s`, `120s` | Sets the test duration or word count limit. | `couik config set time 30s`                  |
 | `quote_type`      | `small`, `mid`, `thicc`     | Adjusts the length/volume of the quotes.    | `couik config set quote_type mid`            |
 | `dashboard_ascii` | path to `.txt` file         | Sets a custom ASCII art for the dashboard.  | `couik config set dashboard_ascii ~/art.txt` |
+| `ghost`           | `on`, `off`                 | Toggle Ghost Mode (race your last run).     | `couik config set ghost off`                 |
 
 ### Custom Dashboard Art
 

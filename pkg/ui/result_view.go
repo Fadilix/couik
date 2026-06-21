@@ -113,8 +113,7 @@ func (m Model) resultsView() string {
 	var attribution string
 	if m.QuoteSource != "" {
 		maxWidth := 80
-
-		label := "Source: " + m.QuoteSource
+		label := "Quote Source: " + m.QuoteSource
 		if len(label) > maxWidth {
 			label = label[:maxWidth-3] + "..."
 		}
@@ -147,6 +146,8 @@ func (m Model) resultsView() string {
 			footerKey.Render("esc "), footerDesc.Render("quit"),
 			footerDesc.Render("  •  "),
 			footerKey.Render("tab "), footerDesc.Render("restart"),
+			footerDesc.Render("  •  "),
+			footerKey.Render("ctrl+l "), footerDesc.Render("race ghost"),
 			footerDesc.Render("  •  "),
 			footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 		)

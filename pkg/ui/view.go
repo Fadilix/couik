@@ -126,6 +126,8 @@ func (m Model) View() string {
 			}
 		case i == m.Session.Index:
 			textArea.WriteString(HighlightStyle.Render(s))
+		case m.GhostHas && m.GhostActive && i == m.GhostIndex && i != m.Session.Index:
+			textArea.WriteString(GhostStyle.Render(s))
 		default:
 			textArea.WriteString(PendingStyle.Render(s))
 		}
@@ -218,6 +220,18 @@ func (m Model) View() string {
 		footerDesc.Render("  •  "),
 		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 	)
+
+	if m.GhostHas {
+		ghostLabel := "ghost on"
+		if !m.GhostActive {
+			ghostLabel = "ghost off"
+		}
+		footerText = lipgloss.JoinHorizontal(lipgloss.Center,
+			footerText,
+			footerDesc.Render("  •  "),
+			footerKey.Render("ctrl+h "), footerDesc.Render(ghostLabel),
+		)
+	}
 
 	var discoRes string
 
