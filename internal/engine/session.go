@@ -1,10 +1,6 @@
 package engine
 
-import (
-	"time"
-
-	"github.com/fadilix/couik/database"
-)
+import "time"
 
 type Session struct {
 	Target         []rune
@@ -17,7 +13,6 @@ type Session struct {
 	Started        bool
 	WpmSamples     []float64
 	TimesSample    []time.Time
-	KeyTimings     []database.KeyTiming
 }
 
 func (s *Session) Progress() float64 {
@@ -30,9 +25,8 @@ func (s *Session) Progress() float64 {
 func NewSession(target string) *Session {
 	targetRune := []rune(target)
 	return &Session{
-		Target:     targetRune,
-		Results:    make([]bool, len(targetRune)),
-		KeyTimings: make([]database.KeyTiming, 0, len(targetRune)+8),
+		Target:  targetRune,
+		Results: make([]bool, len(targetRune)),
 	}
 }
 
@@ -50,7 +44,6 @@ func (s *Session) Type(char string) {
 		s.IsError = !isCorrect
 		s.Results[s.Index] = isCorrect
 		s.Index++
-		s.RecordKeystroke(false)
 	}
 }
 
@@ -60,16 +53,7 @@ func (s *Session) BackSpace() {
 		if s.IsError {
 			s.BackSpaceCount++
 		}
-		s.RecordKeystroke(true)
 	}
-}
-
-func (s *Session) RecordKeystroke(backspace bool) {
-	var offset int64
-	if s.Started {
-		offset = time.Since(s.StartTime).Milliseconds()
-	}
-	s.KeyTimings = append(s.KeyTimings, database.KeyTiming{OffsetMs: offset, Backspace: backspace})
 }
 
 func (s *Session) CalculateTypingSpeed() float64 {

@@ -47,13 +47,12 @@ func (m *Model) SaveResult() {
 	}
 
 	result := database.TestResult{
-		RawWPM:     m.Session.CalculateRawTypingSpeed(),
-		WPM:        m.Session.CalculateTypingSpeed(),
-		Acc:        m.Session.CalculateAccuracy(),
-		Duration:   m.Session.EndTime.Sub(m.Session.StartTime),
-		Quote:      string(m.Session.Target),
-		Date:       m.Session.EndTime,
-		KeyTimings: m.Session.KeyTimings,
+		RawWPM:   m.Session.CalculateRawTypingSpeed(),
+		WPM:      m.Session.CalculateTypingSpeed(),
+		Acc:      m.Session.CalculateAccuracy(),
+		Duration: m.Session.EndTime.Sub(m.Session.StartTime),
+		Quote:    string(m.Session.Target),
+		Date:     m.Session.EndTime,
 	}
 	m.Repo.Save(result)
 

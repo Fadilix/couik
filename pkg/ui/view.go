@@ -126,8 +126,6 @@ func (m Model) View() string {
 			}
 		case i == m.Session.Index:
 			textArea.WriteString(HighlightStyle.Render(s))
-		case m.GhostHas && m.GhostActive && i == m.GhostIndex && i != m.Session.Index:
-			textArea.WriteString(GhostStyle.Render(s))
 		default:
 			textArea.WriteString(PendingStyle.Render(s))
 		}
@@ -221,18 +219,6 @@ func (m Model) View() string {
 		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 	)
 
-	if m.GhostHas {
-		ghostLabel := "ghost on"
-		if !m.GhostActive {
-			ghostLabel = "ghost off"
-		}
-		footerText = lipgloss.JoinHorizontal(lipgloss.Center,
-			footerText,
-			footerDesc.Render("  •  "),
-			footerKey.Render("ctrl+h "), footerDesc.Render(ghostLabel),
-		)
-	}
-
 	var discoRes string
 
 	if m.LastDisconnected != "" {
@@ -281,16 +267,6 @@ func (m Model) HistoryView() string {
 	}
 
 	dashboardStyle := lipgloss.NewStyle().Foreground(CatMauve)
-	footerKey := lipgloss.NewStyle().Foreground(CatLavender).Bold(true)
-	footerDesc := lipgloss.NewStyle().Foreground(CatOverlay)
-
-	footer := lipgloss.JoinHorizontal(lipgloss.Center,
-		footerKey.Render("esc "), footerDesc.Render("quit"),
-		footerDesc.Render("  •  "),
-		footerKey.Render("ctrl+r "), footerDesc.Render("return"),
-		footerDesc.Render("  •  "),
-		footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
-	)
 
 	final := lipgloss.JoinVertical(
 		lipgloss.Center,
@@ -298,8 +274,6 @@ func (m Model) HistoryView() string {
 		"\n",
 		title,
 		baseStyle.Render(m.table.View()+"\n"+m.table.HelpView()+"\n"),
-		"\n",
-		footer,
 	)
 	return lipgloss.Place(m.TerminalWidth, m.TerminalHeight, lipgloss.Center, lipgloss.Center, final)
 }

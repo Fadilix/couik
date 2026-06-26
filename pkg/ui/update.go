@@ -50,14 +50,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
-	case core.GhostTickMsg:
-		if m.State == core.StateTyping && m.GhostHas && m.GhostActive && m.Session.Started {
-			elapsed := time.Since(m.Session.StartTime).Milliseconds()
-			m.GhostIndex = m.Ghost.CursorAt(elapsed)
-			return m, core.GhostTick()
-		}
-		return m, nil
-
 	case network.Message:
 		switch msg.Type {
 		case network.MsgJoin:
@@ -130,20 +122,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if m.State == core.StateHistory {
-			switch msg.Type {
-			case tea.KeyCtrlC, tea.KeyEsc:
-				m.Quitting = true
-				return m, tea.Quit
-			case tea.KeyCtrlR:
-				m.State = core.StateTyping
-				return m, nil
-			default:
-				m.table, cmd = m.table.Update(msg)
-				return m, cmd
-			}
-		}
-
 		switch msg.String() {
 		case "l", "right":
 			m.CurrentSelector.Increment()
@@ -201,14 +179,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Quitting = true
 			return m, tea.Quit
 		case tea.KeyCtrlH:
-			if m.State == core.StateTyping && m.GhostHas {
-				m.GhostActive = !m.GhostActive
-				if m.GhostActive && m.Session.Started {
-					return m, core.GhostTick()
-				}
-			} else {
-				m.State = core.StateHistory
-			}
 			m.State = core.StateHistory
 		case tea.KeyCtrlJ:
 			if m.IsHost && m.Multiplayer {
@@ -299,9 +269,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds = append(cmds, core.WPMTick())
 				if isTimeMode {
 					cmds = append(cmds, core.Tick())
-				}
-				if m.GhostHas && m.GhostActive {
-					cmds = append(cmds, core.GhostTick())
 				}
 			}
 

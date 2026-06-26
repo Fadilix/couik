@@ -53,14 +53,6 @@ func WPMTick() tea.Cmd {
 	})
 }
 
-type GhostTickMsg time.Time
-
-func GhostTick() tea.Cmd {
-	return tea.Tick(time.Millisecond*33, func(t time.Time) tea.Msg {
-		return GhostTickMsg(t)
-	})
-}
-
 type ClearDisconnectMsg struct{}
 
 func ClearDisconnectCmd() tea.Cmd {

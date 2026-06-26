@@ -15,7 +15,6 @@ var (
 	modes         = []string{"quote", "time", "words"}
 	quoteTypes    = []string{"small", "mid", "thicc"}
 	languages     = []string{"french", "english"}
-	ghostValues   = []string{"on", "off"}
 )
 
 func GetConfig() Config {
@@ -45,7 +44,6 @@ func SetConfig(key, value string) {
 		"quote_type",
 		"time",
 		"language",
-		"ghost",
 	}
 
 	if !slices.Contains(availableKeys, key) {
@@ -79,11 +77,6 @@ func SetConfig(key, value string) {
 			log.Fatal("Can't use this language (only english and french available for now)")
 		}
 		config.Language = value
-	case "ghost":
-		if !slices.Contains(ghostValues, value) {
-			log.Fatal("Can't use this value as ghost (only on or off)")
-		}
-		config.Ghost = value
 	}
 
 	path, err := database.GetPath(database.Config)

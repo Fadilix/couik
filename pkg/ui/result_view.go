@@ -147,8 +147,6 @@ func (m Model) resultsView() string {
 			footerDesc.Render("  •  "),
 			footerKey.Render("tab "), footerDesc.Render("restart"),
 			footerDesc.Render("  •  "),
-			footerKey.Render("ctrl+l "), footerDesc.Render("race ghost"),
-			footerDesc.Render("  •  "),
 			footerKey.Render("ctrl+p "), footerDesc.Render("commands"),
 		)
 	}
