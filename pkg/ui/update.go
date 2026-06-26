@@ -130,6 +130,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		if m.State == core.StateHistory {
+			switch msg.Type {
+			case tea.KeyCtrlC, tea.KeyEsc:
+				m.Quitting = true
+				return m, tea.Quit
+			case tea.KeyCtrlR:
+				m.State = core.StateTyping
+				return m, nil
+			default:
+				m.table, cmd = m.table.Update(msg)
+				return m, cmd
+			}
+		}
+
 		switch msg.String() {
 		case "l", "right":
 			m.CurrentSelector.Increment()
