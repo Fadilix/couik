@@ -14,6 +14,7 @@ import (
 	"github.com/fadilix/couik/cmd/couik/cli"
 	"github.com/fadilix/couik/database"
 	"github.com/fadilix/couik/internal/engine"
+	"github.com/fadilix/couik/internal/ghost"
 	"github.com/fadilix/couik/internal/storage"
 	"github.com/fadilix/couik/pkg/network"
 	"github.com/fadilix/couik/pkg/typing"
@@ -71,6 +72,11 @@ type Model struct {
 
 	// history management
 	table table.Model
+
+	Ghost       ghost.Replay
+	GhostHas    bool
+	GhostIndex  int
+	GhostActive bool
 }
 
 type NewModelOption func(*Model)
@@ -175,6 +181,13 @@ func NewModel(target string, options ...NewModelOption) Model {
 		Mu:              &sync.Mutex{},
 		State:           defaultState,
 		table:           t,
+		GhostActive:     config.Ghost != "off",
+		GhostIndex:      -1,
+	}
+
+	if g, ok := ghost.Load(target, history); ok {
+		model.Ghost = g
+		model.GhostHas = true
 	}
 
 	for _, option := range options {
@@ -270,8 +283,22 @@ func (m Model) ApplyMode(mode modes.ModeStrategy, options ...ApplyModelOption) M
 	newModel.Mu = m.Mu
 	newModel.LastDisconnected = m.LastDisconnected
 
+	newModel.GhostActive = m.GhostActive
+
 	for _, option := range options {
 		option(&newModel)
+	}
+
+	if target := string(newModel.Session.Target); target != config.Target {
+		if history, err := newModel.Repo.GetHistory(); err == nil {
+			if g, ok := ghost.Load(target, history); ok {
+				newModel.Ghost = g
+				newModel.GhostHas = true
+			} else {
+				newModel.GhostHas = false
+				newModel.GhostIndex = -1
+			}
+		}
 	}
 
 	return newModel

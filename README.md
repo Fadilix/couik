@@ -26,6 +26,7 @@ Whether you want to warm up before coding, challenge your friends, or just track
 - **Timed Mode**: Test yourself against the clock (`15s`, `30s`, `60s`, `120s`).
 - **Word Mode**: Practice with a set number of words (`10`, `25`, `50`, `100`).
 - **Custom Text**: Load your own text files or paste custom strings.
+- **Ghost Mode**: Race a translucent replay of your last run on the same text — see exactly where you slowed down or sped up, and try to beat it. Toggle with `Ctrl+H` mid-run, or `couik config set ghost off` to disable.
 - **History Tracking**: Keep track of your progress over time with built-in stats.
 - **Beautiful UI**: Modern, clean interface with real-time feedback.
 - **Cross-Platform**: Works on Linux, macOS, and Windows.
@@ -72,7 +73,38 @@ tar -xzf couik_*_linux_amd64.tar.gz
 sudo mv couik /usr/local/bin/
 ```
 
-### Windows (Not stable yet. You can use wsl)
+### Docker
+
+Requires [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
+
+Build the image and run an interactive typing session (history persists across runs in the `couik-vol` named volume):
+
+```bash
+docker compose run --rm --build couik
+```
+
+> The first run builds the image (around a minute) and creates `couik-vol`. Subsequent runs are instant.
+
+Pass any couik flag after the service name:
+
+```bash
+docker compose run --rm couik --history
+docker compose run --rm couik -c "the quick brown fox"
+```
+
+To run on a locally built image without Compose:
+
+```bash
+docker build -t couik:local .
+docker run -it --rm \
+  -e XDG_CONFIG_HOME=/couik \
+  -v couik-vol:/couik \
+  couik:local
+```
+
+> The `-it` flags allocate a TTY so the Bubble Tea UI can render. `--rm` removes the container when you exit. The volume keeps your history and config between runs.
+
+### Windows (Download the realease file or build using docker)
 
 1. Download the `.zip` archive from [Releases](https://github.com/fadilix/couik/releases).
 2. Extract and run `couik.exe`.
@@ -136,6 +168,7 @@ couik [flags]
 | `Ctrl+E`         | Open / close the quote type selector               |
 | `Ctrl+P`         | Open command palette                               |
 | `Ctrl+G`         | Open configuration view                            |
+| `Ctrl+H`         | Toggle Ghost Mode (only on the typing screen)      |
 
 #### Multiplayer (lobby)
 
@@ -160,6 +193,7 @@ couik config set [key] [value]
 | `time`            | `15s`, `30s`, `60s`, `120s` | Sets the test duration or word count limit. | `couik config set time 30s`                  |
 | `quote_type`      | `small`, `mid`, `thicc`     | Adjusts the length/volume of the quotes.    | `couik config set quote_type mid`            |
 | `dashboard_ascii` | path to `.txt` file         | Sets a custom ASCII art for the dashboard.  | `couik config set dashboard_ascii ~/art.txt` |
+| `ghost`           | `on`, `off`                 | Toggle Ghost Mode (race your last run).     | `couik config set ghost off`                 |
 
 ### Custom Dashboard Art
 
