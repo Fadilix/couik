@@ -1,0 +1,4 @@
+dist/
+.git
+*.env
+*.txt
