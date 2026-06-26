@@ -37,6 +37,10 @@ var (
 			Underline(true).
 			Bold(true)
 
+	GhostStyle = lipgloss.NewStyle().
+			Foreground(CatMauve).
+			Faint(true).
+			Underline(true)
 	// Live stats during typing (minimal, no border)
 	StatsStyle = lipgloss.NewStyle().
 			Foreground(CatOverlay).
